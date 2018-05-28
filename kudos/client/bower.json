@@ -1,8 +1,8 @@
 {
   "name": "kudos",
-  "homepage": "https://github.com/devnovators/macrocomite",
+  "homepage": "https://github.com/devnovators/bbvakudos.git",
   "authors": [
-    "devnovators BBVA"
+    "Devnovators BBVA"
   ],
   "description": "BBVA Kudos",
   "main": "index.html",
