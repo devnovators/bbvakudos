@@ -1,0 +1,112 @@
+<dom-module id="kudos-chatbot">
+<link rel="import" href="../css/kudo-style.html">
+    <template>
+        <style include="cards"></style>
+        <div>
+          <div style="display:inline-block;width:90% !important;align:right;">
+            <b><span id="titleBot"></span></b>
+          </div>
+        </div>
+        <div style="height: 85vh;">
+          <div style="overflow-y:auto;height:70vh;" id="chat">
+            <template is="dom-repeat" items="{{mensajes}}">
+                <div class$="[[item.align]]">[[item.from]] dice: [[item.message]]</div>
+            </template>
+          </div>
+          <div id="wait" style="font-size:18px;display: none;">...</div>
+          <div style="width:100%;margin:0px;padding:0px;">
+            <div style="display:inline-block;width:80%;">
+              <paper-textarea id="txtMessage" label="[[userFirstName]], ingresa tu pregunta..."></paper-textarea>
+            </div>
+            <div style="display:inline-block;width:15%;">
+              <paper-icon-button icon="icons:send" id="btnSendMessage" on-tap="sendMessage" autofocus></paper-icon-button>
+            </div>
+          </div>
+        </div>
+          <iron-ajax id="api" url="https://api.api.ai/v1/query" params='{"v":"20150910"}'
+          headers='{"Authorization": "Bearer 7324e6390faf48fca8c4eb7fb9cc2120","Content-Type": "application/json"}'
+          method='POST' body='{{apiRequestBody}}' on-response="apiResponseHandler" handle-as="json" verbose="true" debounce-duration="300"></iron-ajax>
+    </template>
+    <script>
+      Polymer({
+        is: 'kudos-chatbot',
+        properties:{
+          userFirstName   : {type:String, notify:true},
+          userEmail       : {type:String, notify:true},
+          mensajes        : {type:Array, value:function() { return []},observer:"mensajesChanged"},
+          apiRequestBody  : {type:Object},
+          currentCard     : {type:Object, value:function() { return {}}}
+        },
+        ready: function(){
+        },
+        mensajesChanged: function(newVal,oldVal){
+        },
+        apiResponseHandler: function(data) {
+          var card = this.currentCard;
+          var defaultSpeech = data.detail.response.result.fulfillment.speech;
+          var ambienteSpeech = defaultSpeech.replace("||ambiente||",card.ambiente);
+          var ambiente_fechaSpeech = ambienteSpeech.replace("||ambiente_fecha||",card.ambiente_fecha);
+          var canalSpeech = ambiente_fechaSpeech.replace("||canal||",card.canal);
+          var customerSpeech = canalSpeech.replace("||customer||",card.customer);
+          var detallesSpeech = customerSpeech.replace("||detalles||",card.detalles);
+          var diferenciasSpeech = detallesSpeech.replace("||diferencias||",card.diferencias);
+          var limitacionesSpeech = diferenciasSpeech.replace("||limitaciones||",card.limitaciones);
+          var marketingSpeech = limitacionesSpeech.replace("||marketing||",card.marketing);
+          var metricaSpeech = marketingSpeech.replace("||metrica||",card.metrica);
+          var objetivoSpeech = metricaSpeech.replace("||objetivo||",card.objetivo);
+          var participantesSpeech = objetivoSpeech.replace("||participantes||",card.participantes);
+          var tiempoSpeech = participantesSpeech.replace("||tiempo||",card.tiempo);
+          var proyectoSpeech = tiempoSpeech.replace("||proyecto||",card.title);
+          var newMessage = { from: card.leader, message: proyectoSpeech, align: "bot_label"};
+          var thisChat=this;
+          setTimeout(function(){
+            thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
+           }, 100);
+          setTimeout(function(){
+            thisChat.$.wait.style.display = "none";
+            thisChat.push('mensajes', newMessage);
+           }, 800);
+          setTimeout(function(){
+            thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
+           }, 1000);
+        },
+        initBot:function(btn){
+          var btnCard = btn;
+          var card = btnCard.data; this.currentCard = card;
+          var self=this;
+          this.$.txtMessage.value="";
+          this.$.btnSendMessage.data=card.id;
+          this.$.titleBot.innerHTML=card.title;
+          var queryValue = "Iniciar con " + this.userFirstName + " en " +card.id;
+          queryValue = queryValue.replace("á", "a"); queryValue = queryValue.replace("Á", "A");
+          queryValue = queryValue.replace("é", "e"); queryValue = queryValue.replace("É", "E");
+          queryValue = queryValue.replace("í", "i"); queryValue = queryValue.replace("Í", "I");
+          queryValue = queryValue.replace("ó", "o"); queryValue = queryValue.replace("Ó", "O");
+          queryValue = queryValue.replace("ú", "u"); queryValue = queryValue.replace("Ú", "U");
+          queryValue = queryValue.replace("ñ", "n"); queryValue = queryValue.replace("Ñ", "N");
+          this.set("apiRequestBody", { query : [ queryValue ], lang: "es", sessionId: this.userEmail});
+          this.$.api.generateRequest();
+        },
+        sendMessage:function(){
+          if(this.$.txtMessage.value.length!=0){
+            this.$.wait.style.display = "block";
+            var newMessage = { from: this.userFirstName, message: this.$.txtMessage.value, align: "human_label"};
+            this.push('mensajes', newMessage);
+            var queryValue = this.$.txtMessage.value;
+            queryValue = queryValue.replace("á", "a"); queryValue = queryValue.replace("Á", "A");
+            queryValue = queryValue.replace("é", "e"); queryValue = queryValue.replace("É", "E");
+            queryValue = queryValue.replace("í", "i"); queryValue = queryValue.replace("Í", "I");
+            queryValue = queryValue.replace("ó", "o"); queryValue = queryValue.replace("Ó", "O");
+            queryValue = queryValue.replace("ú", "u"); queryValue = queryValue.replace("Ú", "U");
+            queryValue = queryValue.replace("ñ", "n"); queryValue = queryValue.replace("Ñ", "N");
+            this.set("apiRequestBody", { query : [ queryValue ], lang: "es", sessionId: this.userEmail});
+            this.$.api.generateRequest();
+            this.$.txtMessage.value = "";
+          }
+        },
+        closeBot:function(){
+          this.set('mensajes', []);
+        }
+      });
+    </script>
+</dom-module>

@@ -1,0 +1,418 @@
+<dom-module id="kudos-stats">
+<link rel="import" href="../css/kudo-style.html">
+<template id="tmpkudoStats">
+ <style include="cards"></style>
+ <style include="stats"></style>
+  <div class="card">
+    <h3>Resultados del evento</h3>
+  </div>
+  <paper-tabs selected="{{selected}}">
+    <paper-tab>Valoraciones</paper-tab>
+    <paper-tab>Agradecimientos</paper-tab>
+  </paper-tabs>
+
+  <iron-pages selected="{{selected}}">
+    <div class="resultFeedback">
+      <!--<paper-button id="btnReload" toggles on-click="reloadFeedback" class="reload">-->
+      <!--  <iron-icon icon="icons:autorenew"></iron-icon> Reload  -->
+      <!--</paper-button>-->
+      <paper-card class="paper_card_summary">
+        <div class="rate-header titleProject title_summary_div" on-click="unCollapse" data-selector="#blockRating">
+            <div class="display_inline"><img style="width:50%" src="../images/copa.png" data-selector="#blockRating"></div>
+            <div class="display_inline title_summary" data-selector="#blockRating">
+              &gt; Ranking general por estrellas
+            </div>
+        </div>
+        <iron-collapse id="blockRating" style="width:100%;">
+            <div style="width:100%;background: #ecd878;font-weight: bold;" class="row_table_bottom">
+              <div class="display_inline" style="width:8%;">
+                &nbsp;
+              </div>
+              <div class="display_inline" style="width:10%;">
+                Jur.
+              </div>
+              <div class="display_inline" style="width:10%;">
+                Púb.
+              </div>
+              <div class="display_inline" style="width:10%;">
+                Tot.
+              </div>
+              <div class="display_inline" style="width:55%;">
+                Feature
+              </div>
+            </div>
+          <template id="listRating"  is="dom-repeat" items="{{sortedRating}}" as="sortCard">
+            <div class="row_table_bottom" style="width:100%;">
+              <div style="width:100%;">
+                <div class="display_inline" style="width:8%">
+                  <img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTEuOTk5IDUxMS45OTkiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMS45OTkgNTExLjk5OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik00NjYuNDUsNDkuMzc0Yy03LjA2NS04LjMwOC0xNy4zNjgtMTMuMDcxLTI4LjI2Ny0xMy4wNzFINDAyLjQxdi0xMS4xOUM0MDIuNDEsMTEuMjY2LDM5MS4xNDMsMCwzNzcuMjk3LDBIMTM0LjcwNSAgICBjLTEzLjg0OCwwLTI1LjExMiwxMS4yNjYtMjUuMTEyLDI1LjExMnYxMS4xOUg3My44MTZjLTEwLjg5OSwwLTIxLjIwMyw0Ljc2NC0yOC4yNjcsMTMuMDcxICAgIGMtNi45OTIsOC4yMjEtMTAuMDE0LDE5LjAxOS04LjI4OSwyOS42MjRjOS40LDU3LjgsNDUuNzc1LDEwOC44NjMsOTcuNCwxMzYuODcyYzQuNzE3LDExLjM0MSwxMC4wNTksMjIuMDgzLDE2LjAwOCwzMi4wOTEgICAgYzE5LjAwMiwzMS45NzUsNDIuNjI1LDU0LjA3Myw2OC42MjcsNjQuNzZjMi42MzUsMjYuNjQ0LTE1LjA5NCw1MS44ODUtNDEuNzk0LDU3LjljLTAuMDU3LDAuMDEzLTAuMDk3LDAuMDMzLTAuMTUzLDAuMDQ2ICAgIGMtNS4yMTEsMS4yNDUtOS4wOSw1LjkyMS05LjA5LDExLjUxM3Y1NC4zNjNoLTIxLjk4NmMtMTkuNjAyLDAtMzUuNTQ5LDE1Ljk0Ny0zNS41NDksMzUuNTQ5djI4LjA1OCAgICBjMCw2LjU0NSw1LjMwNSwxMS44NSwxMS44NSwxMS44NUgzOTAuNTZjNi41NDUsMCwxMS44NS01LjMwNSwxMS44NS0xMS44NXYtMjguMDU4YzAtMTkuNjAyLTE1Ljk0Ny0zNS41NDktMzUuNTQ5LTM1LjU0OWgtMjEuOTg4ICAgIFYzODIuMThjMC01LjYwMy0zLjg5My0xMC4yODYtOS4xMTgtMTEuNTJjLTAuMDQ5LTAuMDEyLTAuMDk2LTAuMDI4LTAuMTQ1LTAuMDRjLTI2LjkwMi02LjA1NS00NC42NjQtMzEuNTUtNDEuNzUyLTU4LjM5NCAgICBjMjUuNTQ4LTEwLjg2LDQ4Ljc1Ny0zMi43NjEsNjcuNDc5LTY0LjI2NGM1Ljk0OS0xMC4wMDksMTEuMjktMjAuNzUyLDE2LjAwOC0zMi4wOTVjNTEuNjIyLTI4LjAxLDg3Ljk5NS03OS4wNzIsOTcuMzk1LTEzNi44NyAgICBDNDc2LjQ2NSw2OC4zOTIsNDczLjQ0Myw1Ny41OTUsNDY2LjQ1LDQ5LjM3NHogTTYwLjY1Miw3NS4xOTJjLTAuNjE2LTMuNzg3LDAuNDMxLTcuNTA0LDIuOTQ5LTEwLjQ2NiAgICBjMi41NTUtMy4wMDQsNi4yNzctNC43MjYsMTAuMjE0LTQuNzI2aDM1Ljc3N3YyMS44MDJjMCwzNC4xODYsNC4zNjMsNjcuMywxMi42MzIsOTcuNTgzICAgIEM4OS43MjgsMTUzLjcwNiw2Ny4zNTQsMTE2LjQwMyw2MC42NTIsNzUuMTkyeiBNMzY2Ljg2MSw0NjAuMjQzYzYuNTM0LDAsMTEuODUsNS4zMTYsMTEuODUsMTEuODV2MTYuMjA4SDEzNC40MjJ2LTE2LjIwOCAgICBjMC02LjUzNCw1LjMxNi0xMS44NSwxMS44NS0xMS44NUgzNjYuODYxeiBNMzIxLjE3MywzOTQuMDN2NDIuNTEzSDE5MS45NlYzOTQuMDNIMzIxLjE3M3ogTTIyMy4wMzcsMzcwLjMzMSAgICBjMi45MjktMy4yMjQsNS42MDctNi43MTksOC4wMDItMTAuNDZjNy44OTctMTIuMzM5LDEyLjA0Mi0yNi4zNTcsMTIuMjI4LTQwLjY3NGM0LjIwOSwwLjU3Myw4LjQ1NywwLjg4LDEyLjc0MSwwLjg4ICAgIGM0LjY2MSwwLDkuMjc5LTAuMzU4LDEzLjg1Mi0xLjAzNmMwLjI3LDE5LjIzOSw3Ljc1OCwzNy40NSwyMC4zNDksNTEuMjg5SDIyMy4wMzd6IE0zNzguNzA5LDgxLjgwMyAgICBjMCw1OC4zNzktMTMuNDA2LDExMy4wODktMzcuNzQ3LDE1NC4wNDljLTIzLjE5MiwzOS4wMy01My4zNjQsNjAuNTI1LTg0Ljk1Niw2MC41MjVjLTMxLjU5NywwLTYxLjc3MS0yMS40OTQtODQuOTY2LTYwLjUyMyAgICBjLTI0LjM0Mi00MC45NjEtMzcuNzQ4LTk1LjY3MS0zNy43NDgtMTU0LjA0OVYyNS4xMTJjMC0wLjc4LDAuNjM0LTEuNDEzLDEuNDEyLTEuNDEzaDI0Mi41OTFjMC43OCwwLDEuNDE0LDAuNjM0LDEuNDE0LDEuNDEzICAgIFY4MS44MDN6IE00NTEuMzQ4LDc1LjE5MmMtNi43MDIsNDEuMjA4LTI5LjA3NCw3OC41MS02MS41NjksMTA0LjE5MWM4LjI2OC0zMC4yODMsMTIuNjMxLTYzLjM5NSwxMi42MzEtOTcuNThWNjAuMDAxaDM1Ljc3MyAgICBjMy45MzgsMCw3LjY2LDEuNzIzLDEwLjIxNCw0LjcyNkM0NTAuOTE1LDY3LjY4OCw0NTEuOTYzLDcxLjQwNSw0NTEuMzQ4LDc1LjE5MnoiIGZpbGw9IiNGRkRBNDQiLz4KCTwvZz4KPC9nPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0zMjcuOTQxLDEyMS42NThjLTEuMzk1LTQuMjg4LTUuMTAzLTcuNDE0LTkuNTY2LTguMDY0bC0zNS43NTgtNS4xOTZsLTE1Ljk5MS0zMi40MDIgICAgYy0xLjk5Ny00LjA0NC02LjExNi02LjYwNS0xMC42MjYtNi42MDVjLTQuNTExLDAtOC42MywyLjU2MS0xMC42MjYsNi42MDVsLTE1Ljk5MSwzMi40MDJsLTM1Ljc1OCw1LjE5NiAgICBjLTQuNDY0LDAuNjQ4LTguMTcyLDMuNzc1LTkuNTY2LDguMDY1Yy0xLjM5Myw0LjI5MS0wLjIzMSw4Ljk5OSwyLjk5OSwxMi4xNDhsMjUuODc1LDI1LjIyMWwtNi4xMDksMzUuNjEzICAgIGMtMC43NjMsNC40NDYsMS4wNjQsOC45MzgsNC43MTQsMTEuNTljMy42NDgsMi42NTEsOC40ODcsMywxMi40NzksMC45MDJMMjU2LDE5MC4zMmwzMS45ODIsMTYuODEzICAgIGMxLjczNCwwLjkxMSwzLjYyNywxLjM2LDUuNTEyLDEuMzZjMi40NTYsMCw0LjkwMi0wLjc2Myw2Ljk2Ni0yLjI2M2MzLjY1LTIuNjUyLDUuNDc3LTcuMTQ0LDQuNzE0LTExLjU5bC02LjEwOS0zNS42MTMgICAgbDI1Ljg3NS0yNS4yMjFDMzI4LjE3MiwxMzAuNjU4LDMyOS4zMzQsMTI1Ljk0OSwzMjcuOTQxLDEyMS42NTh6IE0yNzguMDY0LDE0Ni40MDVjLTIuNzkzLDIuNzIyLTQuMDY4LDYuNjQ0LTMuNDA4LDEwLjQ4OSAgICBsMy4xMDIsMTguMDlsLTE2LjI0NS04LjU0MWMtMS43MjUtMC45MDgtMy42Mi0xLjM2LTUuNTE0LTEuMzZjLTEuODk0LDAtMy43ODgsMC40NTQtNS41MTQsMS4zNmwtMTYuMjQ1LDguNTQxbDMuMTAyLTE4LjA5ICAgIGMwLjY2LTMuODQ0LTAuNjE1LTcuNzY2LTMuNDA4LTEwLjQ4OWwtMTMuMTQxLTEyLjgxbDE4LjE2Mi0yLjY0YzMuODU5LTAuNTYsNy4xOTYtMi45ODUsOC45MjItNi40ODJsOC4xMjMtMTYuNDU4bDguMTIyLDE2LjQ1OCAgICBjMS43MjcsMy40OTcsNS4wNjIsNS45MjEsOC45MjIsNi40ODJsMTguMTYyLDIuNjRMMjc4LjA2NCwxNDYuNDA1eiIgZmlsbD0iI0ZGREE0NCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" />
+                </div> 
+                <div class="display_inline" style="width:10%;text-align:right;">
+                  {{sortCard.averageJury}}  
+                </div>
+                <div class="display_inline" style="width:10%;text-align:right;">
+                  {{sortCard.averagePublic}}  
+                </div>
+                <div class="display_inline" style="width:10%;text-align:right;">
+                  {{sortCard.averageRating}}  
+                </div>
+                <div class="display_inline" style="vertical-align:middle;width:55%;text-align: left;padding-left:5px;"> 
+                  {{sortCard.title}}<br>
+                  <template is="dom-if" if="{{sortCard.withFeedback}}">
+                    <paper-button class="rate-icon feeback" id="star_{{sortCard.id}}" data='{{sortCard}}' on-click="getComments">
+                      Ver comentarios <iron-icon icon="announcement" data='{{sortCard}}'></iron-icon>
+                    </paper-button>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+        </iron-collapse>
+      </paper-card>
+      
+      <paper-card class="paper_card_summary">
+        <div class="rate-header titleProject" style="height:70px;background:#2dcccd;" on-click="unCollapse" data-selector="#blockCustomer">
+            <div class="display_inline"><img style="width:80%" src="../images/values/elclienteprimero_.png" data-selector="#blockCustomer"></div>
+            <div class="display_inline" style="top: 40%;transform: translateY(-60%);font-weight:bolder;color:#fff!important;" data-selector="#blockCustomer">
+              &gt; Customer Comes First
+            </div>
+        </div>
+        <iron-collapse id="blockCustomer" style="width:100%;">
+          <template  id="listCustomer" is="dom-repeat" items="{{sortedCustomer}}" as="sortCard">
+            <div width="100%" style="text-align:left !important;margin-top:3px;">
+              <div style="display:inline-block;width:5%">
+                <img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTEuOTk5IDUxMS45OTkiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMS45OTkgNTExLjk5OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik00NjYuNDUsNDkuMzc0Yy03LjA2NS04LjMwOC0xNy4zNjgtMTMuMDcxLTI4LjI2Ny0xMy4wNzFINDAyLjQxdi0xMS4xOUM0MDIuNDEsMTEuMjY2LDM5MS4xNDMsMCwzNzcuMjk3LDBIMTM0LjcwNSAgICBjLTEzLjg0OCwwLTI1LjExMiwxMS4yNjYtMjUuMTEyLDI1LjExMnYxMS4xOUg3My44MTZjLTEwLjg5OSwwLTIxLjIwMyw0Ljc2NC0yOC4yNjcsMTMuMDcxICAgIGMtNi45OTIsOC4yMjEtMTAuMDE0LDE5LjAxOS04LjI4OSwyOS42MjRjOS40LDU3LjgsNDUuNzc1LDEwOC44NjMsOTcuNCwxMzYuODcyYzQuNzE3LDExLjM0MSwxMC4wNTksMjIuMDgzLDE2LjAwOCwzMi4wOTEgICAgYzE5LjAwMiwzMS45NzUsNDIuNjI1LDU0LjA3Myw2OC42MjcsNjQuNzZjMi42MzUsMjYuNjQ0LTE1LjA5NCw1MS44ODUtNDEuNzk0LDU3LjljLTAuMDU3LDAuMDEzLTAuMDk3LDAuMDMzLTAuMTUzLDAuMDQ2ICAgIGMtNS4yMTEsMS4yNDUtOS4wOSw1LjkyMS05LjA5LDExLjUxM3Y1NC4zNjNoLTIxLjk4NmMtMTkuNjAyLDAtMzUuNTQ5LDE1Ljk0Ny0zNS41NDksMzUuNTQ5djI4LjA1OCAgICBjMCw2LjU0NSw1LjMwNSwxMS44NSwxMS44NSwxMS44NUgzOTAuNTZjNi41NDUsMCwxMS44NS01LjMwNSwxMS44NS0xMS44NXYtMjguMDU4YzAtMTkuNjAyLTE1Ljk0Ny0zNS41NDktMzUuNTQ5LTM1LjU0OWgtMjEuOTg4ICAgIFYzODIuMThjMC01LjYwMy0zLjg5My0xMC4yODYtOS4xMTgtMTEuNTJjLTAuMDQ5LTAuMDEyLTAuMDk2LTAuMDI4LTAuMTQ1LTAuMDRjLTI2LjkwMi02LjA1NS00NC42NjQtMzEuNTUtNDEuNzUyLTU4LjM5NCAgICBjMjUuNTQ4LTEwLjg2LDQ4Ljc1Ny0zMi43NjEsNjcuNDc5LTY0LjI2NGM1Ljk0OS0xMC4wMDksMTEuMjktMjAuNzUyLDE2LjAwOC0zMi4wOTVjNTEuNjIyLTI4LjAxLDg3Ljk5NS03OS4wNzIsOTcuMzk1LTEzNi44NyAgICBDNDc2LjQ2NSw2OC4zOTIsNDczLjQ0Myw1Ny41OTUsNDY2LjQ1LDQ5LjM3NHogTTYwLjY1Miw3NS4xOTJjLTAuNjE2LTMuNzg3LDAuNDMxLTcuNTA0LDIuOTQ5LTEwLjQ2NiAgICBjMi41NTUtMy4wMDQsNi4yNzctNC43MjYsMTAuMjE0LTQuNzI2aDM1Ljc3N3YyMS44MDJjMCwzNC4xODYsNC4zNjMsNjcuMywxMi42MzIsOTcuNTgzICAgIEM4OS43MjgsMTUzLjcwNiw2Ny4zNTQsMTE2LjQwMyw2MC42NTIsNzUuMTkyeiBNMzY2Ljg2MSw0NjAuMjQzYzYuNTM0LDAsMTEuODUsNS4zMTYsMTEuODUsMTEuODV2MTYuMjA4SDEzNC40MjJ2LTE2LjIwOCAgICBjMC02LjUzNCw1LjMxNi0xMS44NSwxMS44NS0xMS44NUgzNjYuODYxeiBNMzIxLjE3MywzOTQuMDN2NDIuNTEzSDE5MS45NlYzOTQuMDNIMzIxLjE3M3ogTTIyMy4wMzcsMzcwLjMzMSAgICBjMi45MjktMy4yMjQsNS42MDctNi43MTksOC4wMDItMTAuNDZjNy44OTctMTIuMzM5LDEyLjA0Mi0yNi4zNTcsMTIuMjI4LTQwLjY3NGM0LjIwOSwwLjU3Myw4LjQ1NywwLjg4LDEyLjc0MSwwLjg4ICAgIGM0LjY2MSwwLDkuMjc5LTAuMzU4LDEzLjg1Mi0xLjAzNmMwLjI3LDE5LjIzOSw3Ljc1OCwzNy40NSwyMC4zNDksNTEuMjg5SDIyMy4wMzd6IE0zNzguNzA5LDgxLjgwMyAgICBjMCw1OC4zNzktMTMuNDA2LDExMy4wODktMzcuNzQ3LDE1NC4wNDljLTIzLjE5MiwzOS4wMy01My4zNjQsNjAuNTI1LTg0Ljk1Niw2MC41MjVjLTMxLjU5NywwLTYxLjc3MS0yMS40OTQtODQuOTY2LTYwLjUyMyAgICBjLTI0LjM0Mi00MC45NjEtMzcuNzQ4LTk1LjY3MS0zNy43NDgtMTU0LjA0OVYyNS4xMTJjMC0wLjc4LDAuNjM0LTEuNDEzLDEuNDEyLTEuNDEzaDI0Mi41OTFjMC43OCwwLDEuNDE0LDAuNjM0LDEuNDE0LDEuNDEzICAgIFY4MS44MDN6IE00NTEuMzQ4LDc1LjE5MmMtNi43MDIsNDEuMjA4LTI5LjA3NCw3OC41MS02MS41NjksMTA0LjE5MWM4LjI2OC0zMC4yODMsMTIuNjMxLTYzLjM5NSwxMi42MzEtOTcuNThWNjAuMDAxaDM1Ljc3MyAgICBjMy45MzgsMCw3LjY2LDEuNzIzLDEwLjIxNCw0LjcyNkM0NTAuOTE1LDY3LjY4OCw0NTEuOTYzLDcxLjQwNSw0NTEuMzQ4LDc1LjE5MnoiIGZpbGw9IiNGRkRBNDQiLz4KCTwvZz4KPC9nPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0zMjcuOTQxLDEyMS42NThjLTEuMzk1LTQuMjg4LTUuMTAzLTcuNDE0LTkuNTY2LTguMDY0bC0zNS43NTgtNS4xOTZsLTE1Ljk5MS0zMi40MDIgICAgYy0xLjk5Ny00LjA0NC02LjExNi02LjYwNS0xMC42MjYtNi42MDVjLTQuNTExLDAtOC42MywyLjU2MS0xMC42MjYsNi42MDVsLTE1Ljk5MSwzMi40MDJsLTM1Ljc1OCw1LjE5NiAgICBjLTQuNDY0LDAuNjQ4LTguMTcyLDMuNzc1LTkuNTY2LDguMDY1Yy0xLjM5Myw0LjI5MS0wLjIzMSw4Ljk5OSwyLjk5OSwxMi4xNDhsMjUuODc1LDI1LjIyMWwtNi4xMDksMzUuNjEzICAgIGMtMC43NjMsNC40NDYsMS4wNjQsOC45MzgsNC43MTQsMTEuNTljMy42NDgsMi42NTEsOC40ODcsMywxMi40NzksMC45MDJMMjU2LDE5MC4zMmwzMS45ODIsMTYuODEzICAgIGMxLjczNCwwLjkxMSwzLjYyNywxLjM2LDUuNTEyLDEuMzZjMi40NTYsMCw0LjkwMi0wLjc2Myw2Ljk2Ni0yLjI2M2MzLjY1LTIuNjUyLDUuNDc3LTcuMTQ0LDQuNzE0LTExLjU5bC02LjEwOS0zNS42MTMgICAgbDI1Ljg3NS0yNS4yMjFDMzI4LjE3MiwxMzAuNjU4LDMyOS4zMzQsMTI1Ljk0OSwzMjcuOTQxLDEyMS42NTh6IE0yNzguMDY0LDE0Ni40MDVjLTIuNzkzLDIuNzIyLTQuMDY4LDYuNjQ0LTMuNDA4LDEwLjQ4OSAgICBsMy4xMDIsMTguMDlsLTE2LjI0NS04LjU0MWMtMS43MjUtMC45MDgtMy42Mi0xLjM2LTUuNTE0LTEuMzZjLTEuODk0LDAtMy43ODgsMC40NTQtNS41MTQsMS4zNmwtMTYuMjQ1LDguNTQxbDMuMTAyLTE4LjA5ICAgIGMwLjY2LTMuODQ0LTAuNjE1LTcuNzY2LTMuNDA4LTEwLjQ4OWwtMTMuMTQxLTEyLjgxbDE4LjE2Mi0yLjY0YzMuODU5LTAuNTYsNy4xOTYtMi45ODUsOC45MjItNi40ODJsOC4xMjMtMTYuNDU4bDguMTIyLDE2LjQ1OCAgICBjMS43MjcsMy40OTcsNS4wNjIsNS45MjEsOC45MjIsNi40ODJsMTguMTYyLDIuNjRMMjc4LjA2NCwxNDYuNDA1eiIgZmlsbD0iI0ZGREE0NCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" />
+              </div> 
+              <div style="display:inline-block;width:10%;text-align:right;">
+                {{sortCard.kudoCustomer}}  
+              </div>
+              
+              <div style="vertical-align:middle;display:inline-block;width:70%;padding-left:10px;"> &gt; {{sortCard.title}}</div>
+            </div>
+          </template>
+        </iron-collapse>
+      </paper-card>
+      
+      <paper-card class="paper_card_summary">
+        <div class="rate-header titleProject" style="height:70px;background:#2a86ca;" on-click="unCollapse" data-selector="#blockThink">
+            <div class="display_inline"><img style="width:80%" src="../images/values/pensamosengrande_.png" data-selector="#blockThink"></div>
+            <div class="display_inline" style="top: 40%;transform: translateY(-60%);font-weight:bolder;color:#fff!important;" data-selector="#blockThink">&gt; We Think Big</div>
+        </div>
+        <iron-collapse id="blockThink" style="width:100%;">
+          <template   id="listThink" is="dom-repeat" items="{{sortedThink}}" as="sortCard">
+            <div width="100%" style="text-align:left !important;margin-top:3px;">
+              <div style="display:inline-block;width:5%">
+                <img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTEuOTk5IDUxMS45OTkiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMS45OTkgNTExLjk5OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik00NjYuNDUsNDkuMzc0Yy03LjA2NS04LjMwOC0xNy4zNjgtMTMuMDcxLTI4LjI2Ny0xMy4wNzFINDAyLjQxdi0xMS4xOUM0MDIuNDEsMTEuMjY2LDM5MS4xNDMsMCwzNzcuMjk3LDBIMTM0LjcwNSAgICBjLTEzLjg0OCwwLTI1LjExMiwxMS4yNjYtMjUuMTEyLDI1LjExMnYxMS4xOUg3My44MTZjLTEwLjg5OSwwLTIxLjIwMyw0Ljc2NC0yOC4yNjcsMTMuMDcxICAgIGMtNi45OTIsOC4yMjEtMTAuMDE0LDE5LjAxOS04LjI4OSwyOS42MjRjOS40LDU3LjgsNDUuNzc1LDEwOC44NjMsOTcuNCwxMzYuODcyYzQuNzE3LDExLjM0MSwxMC4wNTksMjIuMDgzLDE2LjAwOCwzMi4wOTEgICAgYzE5LjAwMiwzMS45NzUsNDIuNjI1LDU0LjA3Myw2OC42MjcsNjQuNzZjMi42MzUsMjYuNjQ0LTE1LjA5NCw1MS44ODUtNDEuNzk0LDU3LjljLTAuMDU3LDAuMDEzLTAuMDk3LDAuMDMzLTAuMTUzLDAuMDQ2ICAgIGMtNS4yMTEsMS4yNDUtOS4wOSw1LjkyMS05LjA5LDExLjUxM3Y1NC4zNjNoLTIxLjk4NmMtMTkuNjAyLDAtMzUuNTQ5LDE1Ljk0Ny0zNS41NDksMzUuNTQ5djI4LjA1OCAgICBjMCw2LjU0NSw1LjMwNSwxMS44NSwxMS44NSwxMS44NUgzOTAuNTZjNi41NDUsMCwxMS44NS01LjMwNSwxMS44NS0xMS44NXYtMjguMDU4YzAtMTkuNjAyLTE1Ljk0Ny0zNS41NDktMzUuNTQ5LTM1LjU0OWgtMjEuOTg4ICAgIFYzODIuMThjMC01LjYwMy0zLjg5My0xMC4yODYtOS4xMTgtMTEuNTJjLTAuMDQ5LTAuMDEyLTAuMDk2LTAuMDI4LTAuMTQ1LTAuMDRjLTI2LjkwMi02LjA1NS00NC42NjQtMzEuNTUtNDEuNzUyLTU4LjM5NCAgICBjMjUuNTQ4LTEwLjg2LDQ4Ljc1Ny0zMi43NjEsNjcuNDc5LTY0LjI2NGM1Ljk0OS0xMC4wMDksMTEuMjktMjAuNzUyLDE2LjAwOC0zMi4wOTVjNTEuNjIyLTI4LjAxLDg3Ljk5NS03OS4wNzIsOTcuMzk1LTEzNi44NyAgICBDNDc2LjQ2NSw2OC4zOTIsNDczLjQ0Myw1Ny41OTUsNDY2LjQ1LDQ5LjM3NHogTTYwLjY1Miw3NS4xOTJjLTAuNjE2LTMuNzg3LDAuNDMxLTcuNTA0LDIuOTQ5LTEwLjQ2NiAgICBjMi41NTUtMy4wMDQsNi4yNzctNC43MjYsMTAuMjE0LTQuNzI2aDM1Ljc3N3YyMS44MDJjMCwzNC4xODYsNC4zNjMsNjcuMywxMi42MzIsOTcuNTgzICAgIEM4OS43MjgsMTUzLjcwNiw2Ny4zNTQsMTE2LjQwMyw2MC42NTIsNzUuMTkyeiBNMzY2Ljg2MSw0NjAuMjQzYzYuNTM0LDAsMTEuODUsNS4zMTYsMTEuODUsMTEuODV2MTYuMjA4SDEzNC40MjJ2LTE2LjIwOCAgICBjMC02LjUzNCw1LjMxNi0xMS44NSwxMS44NS0xMS44NUgzNjYuODYxeiBNMzIxLjE3MywzOTQuMDN2NDIuNTEzSDE5MS45NlYzOTQuMDNIMzIxLjE3M3ogTTIyMy4wMzcsMzcwLjMzMSAgICBjMi45MjktMy4yMjQsNS42MDctNi43MTksOC4wMDItMTAuNDZjNy44OTctMTIuMzM5LDEyLjA0Mi0yNi4zNTcsMTIuMjI4LTQwLjY3NGM0LjIwOSwwLjU3Myw4LjQ1NywwLjg4LDEyLjc0MSwwLjg4ICAgIGM0LjY2MSwwLDkuMjc5LTAuMzU4LDEzLjg1Mi0xLjAzNmMwLjI3LDE5LjIzOSw3Ljc1OCwzNy40NSwyMC4zNDksNTEuMjg5SDIyMy4wMzd6IE0zNzguNzA5LDgxLjgwMyAgICBjMCw1OC4zNzktMTMuNDA2LDExMy4wODktMzcuNzQ3LDE1NC4wNDljLTIzLjE5MiwzOS4wMy01My4zNjQsNjAuNTI1LTg0Ljk1Niw2MC41MjVjLTMxLjU5NywwLTYxLjc3MS0yMS40OTQtODQuOTY2LTYwLjUyMyAgICBjLTI0LjM0Mi00MC45NjEtMzcuNzQ4LTk1LjY3MS0zNy43NDgtMTU0LjA0OVYyNS4xMTJjMC0wLjc4LDAuNjM0LTEuNDEzLDEuNDEyLTEuNDEzaDI0Mi41OTFjMC43OCwwLDEuNDE0LDAuNjM0LDEuNDE0LDEuNDEzICAgIFY4MS44MDN6IE00NTEuMzQ4LDc1LjE5MmMtNi43MDIsNDEuMjA4LTI5LjA3NCw3OC41MS02MS41NjksMTA0LjE5MWM4LjI2OC0zMC4yODMsMTIuNjMxLTYzLjM5NSwxMi42MzEtOTcuNThWNjAuMDAxaDM1Ljc3MyAgICBjMy45MzgsMCw3LjY2LDEuNzIzLDEwLjIxNCw0LjcyNkM0NTAuOTE1LDY3LjY4OCw0NTEuOTYzLDcxLjQwNSw0NTEuMzQ4LDc1LjE5MnoiIGZpbGw9IiNGRkRBNDQiLz4KCTwvZz4KPC9nPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0zMjcuOTQxLDEyMS42NThjLTEuMzk1LTQuMjg4LTUuMTAzLTcuNDE0LTkuNTY2LTguMDY0bC0zNS43NTgtNS4xOTZsLTE1Ljk5MS0zMi40MDIgICAgYy0xLjk5Ny00LjA0NC02LjExNi02LjYwNS0xMC42MjYtNi42MDVjLTQuNTExLDAtOC42MywyLjU2MS0xMC42MjYsNi42MDVsLTE1Ljk5MSwzMi40MDJsLTM1Ljc1OCw1LjE5NiAgICBjLTQuNDY0LDAuNjQ4LTguMTcyLDMuNzc1LTkuNTY2LDguMDY1Yy0xLjM5Myw0LjI5MS0wLjIzMSw4Ljk5OSwyLjk5OSwxMi4xNDhsMjUuODc1LDI1LjIyMWwtNi4xMDksMzUuNjEzICAgIGMtMC43NjMsNC40NDYsMS4wNjQsOC45MzgsNC43MTQsMTEuNTljMy42NDgsMi42NTEsOC40ODcsMywxMi40NzksMC45MDJMMjU2LDE5MC4zMmwzMS45ODIsMTYuODEzICAgIGMxLjczNCwwLjkxMSwzLjYyNywxLjM2LDUuNTEyLDEuMzZjMi40NTYsMCw0LjkwMi0wLjc2Myw2Ljk2Ni0yLjI2M2MzLjY1LTIuNjUyLDUuNDc3LTcuMTQ0LDQuNzE0LTExLjU5bC02LjEwOS0zNS42MTMgICAgbDI1Ljg3NS0yNS4yMjFDMzI4LjE3MiwxMzAuNjU4LDMyOS4zMzQsMTI1Ljk0OSwzMjcuOTQxLDEyMS42NTh6IE0yNzguMDY0LDE0Ni40MDVjLTIuNzkzLDIuNzIyLTQuMDY4LDYuNjQ0LTMuNDA4LDEwLjQ4OSAgICBsMy4xMDIsMTguMDlsLTE2LjI0NS04LjU0MWMtMS43MjUtMC45MDgtMy42Mi0xLjM2LTUuNTE0LTEuMzZjLTEuODk0LDAtMy43ODgsMC40NTQtNS41MTQsMS4zNmwtMTYuMjQ1LDguNTQxbDMuMTAyLTE4LjA5ICAgIGMwLjY2LTMuODQ0LTAuNjE1LTcuNzY2LTMuNDA4LTEwLjQ4OWwtMTMuMTQxLTEyLjgxbDE4LjE2Mi0yLjY0YzMuODU5LTAuNTYsNy4xOTYtMi45ODUsOC45MjItNi40ODJsOC4xMjMtMTYuNDU4bDguMTIyLDE2LjQ1OCAgICBjMS43MjcsMy40OTcsNS4wNjIsNS45MjEsOC45MjIsNi40ODJsMTguMTYyLDIuNjRMMjc4LjA2NCwxNDYuNDA1eiIgZmlsbD0iI0ZGREE0NCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" />
+              </div>
+              <div style="display:inline-block;width:10%;text-align:right;">
+                {{sortCard.kudoThink}}  
+              </div>
+              
+              <div style="vertical-align:middle;display:inline-block;width:70%;padding-left:10px;"> &gt; {{sortCard.title}}</div>
+            </div>
+          </template>
+        </iron-collapse>
+      </paper-card>
+      
+      <paper-card class="paper_card_summary">
+        <div class="rate-header titleProject" style="height:70px;background:#999999;" on-click="unCollapse" data-selector="#blockTeam">
+            <div class="display_inline"><img style="width:80%" src="../images/values/oneteam_.png" data-selector="#blockTeam"></div>
+            <div class="display_inline" style="top: 40%;transform: translateY(-60%);font-weight:bolder;color:#fff!important;" data-selector="#blockTeam">&gt; We Are One Team</div>
+        </div>
+        <iron-collapse id="blockTeam" style="width:100%;">
+          <template  id="listTeam" is="dom-repeat" items="{{sortedTeam}}" as="sortCard">
+            <div width="100%" style="text-align:left !important;margin-top:3px;">
+              <div style="display:inline-block;width:5%">
+                <img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTEuOTk5IDUxMS45OTkiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMS45OTkgNTExLjk5OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik00NjYuNDUsNDkuMzc0Yy03LjA2NS04LjMwOC0xNy4zNjgtMTMuMDcxLTI4LjI2Ny0xMy4wNzFINDAyLjQxdi0xMS4xOUM0MDIuNDEsMTEuMjY2LDM5MS4xNDMsMCwzNzcuMjk3LDBIMTM0LjcwNSAgICBjLTEzLjg0OCwwLTI1LjExMiwxMS4yNjYtMjUuMTEyLDI1LjExMnYxMS4xOUg3My44MTZjLTEwLjg5OSwwLTIxLjIwMyw0Ljc2NC0yOC4yNjcsMTMuMDcxICAgIGMtNi45OTIsOC4yMjEtMTAuMDE0LDE5LjAxOS04LjI4OSwyOS42MjRjOS40LDU3LjgsNDUuNzc1LDEwOC44NjMsOTcuNCwxMzYuODcyYzQuNzE3LDExLjM0MSwxMC4wNTksMjIuMDgzLDE2LjAwOCwzMi4wOTEgICAgYzE5LjAwMiwzMS45NzUsNDIuNjI1LDU0LjA3Myw2OC42MjcsNjQuNzZjMi42MzUsMjYuNjQ0LTE1LjA5NCw1MS44ODUtNDEuNzk0LDU3LjljLTAuMDU3LDAuMDEzLTAuMDk3LDAuMDMzLTAuMTUzLDAuMDQ2ICAgIGMtNS4yMTEsMS4yNDUtOS4wOSw1LjkyMS05LjA5LDExLjUxM3Y1NC4zNjNoLTIxLjk4NmMtMTkuNjAyLDAtMzUuNTQ5LDE1Ljk0Ny0zNS41NDksMzUuNTQ5djI4LjA1OCAgICBjMCw2LjU0NSw1LjMwNSwxMS44NSwxMS44NSwxMS44NUgzOTAuNTZjNi41NDUsMCwxMS44NS01LjMwNSwxMS44NS0xMS44NXYtMjguMDU4YzAtMTkuNjAyLTE1Ljk0Ny0zNS41NDktMzUuNTQ5LTM1LjU0OWgtMjEuOTg4ICAgIFYzODIuMThjMC01LjYwMy0zLjg5My0xMC4yODYtOS4xMTgtMTEuNTJjLTAuMDQ5LTAuMDEyLTAuMDk2LTAuMDI4LTAuMTQ1LTAuMDRjLTI2LjkwMi02LjA1NS00NC42NjQtMzEuNTUtNDEuNzUyLTU4LjM5NCAgICBjMjUuNTQ4LTEwLjg2LDQ4Ljc1Ny0zMi43NjEsNjcuNDc5LTY0LjI2NGM1Ljk0OS0xMC4wMDksMTEuMjktMjAuNzUyLDE2LjAwOC0zMi4wOTVjNTEuNjIyLTI4LjAxLDg3Ljk5NS03OS4wNzIsOTcuMzk1LTEzNi44NyAgICBDNDc2LjQ2NSw2OC4zOTIsNDczLjQ0Myw1Ny41OTUsNDY2LjQ1LDQ5LjM3NHogTTYwLjY1Miw3NS4xOTJjLTAuNjE2LTMuNzg3LDAuNDMxLTcuNTA0LDIuOTQ5LTEwLjQ2NiAgICBjMi41NTUtMy4wMDQsNi4yNzctNC43MjYsMTAuMjE0LTQuNzI2aDM1Ljc3N3YyMS44MDJjMCwzNC4xODYsNC4zNjMsNjcuMywxMi42MzIsOTcuNTgzICAgIEM4OS43MjgsMTUzLjcwNiw2Ny4zNTQsMTE2LjQwMyw2MC42NTIsNzUuMTkyeiBNMzY2Ljg2MSw0NjAuMjQzYzYuNTM0LDAsMTEuODUsNS4zMTYsMTEuODUsMTEuODV2MTYuMjA4SDEzNC40MjJ2LTE2LjIwOCAgICBjMC02LjUzNCw1LjMxNi0xMS44NSwxMS44NS0xMS44NUgzNjYuODYxeiBNMzIxLjE3MywzOTQuMDN2NDIuNTEzSDE5MS45NlYzOTQuMDNIMzIxLjE3M3ogTTIyMy4wMzcsMzcwLjMzMSAgICBjMi45MjktMy4yMjQsNS42MDctNi43MTksOC4wMDItMTAuNDZjNy44OTctMTIuMzM5LDEyLjA0Mi0yNi4zNTcsMTIuMjI4LTQwLjY3NGM0LjIwOSwwLjU3Myw4LjQ1NywwLjg4LDEyLjc0MSwwLjg4ICAgIGM0LjY2MSwwLDkuMjc5LTAuMzU4LDEzLjg1Mi0xLjAzNmMwLjI3LDE5LjIzOSw3Ljc1OCwzNy40NSwyMC4zNDksNTEuMjg5SDIyMy4wMzd6IE0zNzguNzA5LDgxLjgwMyAgICBjMCw1OC4zNzktMTMuNDA2LDExMy4wODktMzcuNzQ3LDE1NC4wNDljLTIzLjE5MiwzOS4wMy01My4zNjQsNjAuNTI1LTg0Ljk1Niw2MC41MjVjLTMxLjU5NywwLTYxLjc3MS0yMS40OTQtODQuOTY2LTYwLjUyMyAgICBjLTI0LjM0Mi00MC45NjEtMzcuNzQ4LTk1LjY3MS0zNy43NDgtMTU0LjA0OVYyNS4xMTJjMC0wLjc4LDAuNjM0LTEuNDEzLDEuNDEyLTEuNDEzaDI0Mi41OTFjMC43OCwwLDEuNDE0LDAuNjM0LDEuNDE0LDEuNDEzICAgIFY4MS44MDN6IE00NTEuMzQ4LDc1LjE5MmMtNi43MDIsNDEuMjA4LTI5LjA3NCw3OC41MS02MS41NjksMTA0LjE5MWM4LjI2OC0zMC4yODMsMTIuNjMxLTYzLjM5NSwxMi42MzEtOTcuNThWNjAuMDAxaDM1Ljc3MyAgICBjMy45MzgsMCw3LjY2LDEuNzIzLDEwLjIxNCw0LjcyNkM0NTAuOTE1LDY3LjY4OCw0NTEuOTYzLDcxLjQwNSw0NTEuMzQ4LDc1LjE5MnoiIGZpbGw9IiNGRkRBNDQiLz4KCTwvZz4KPC9nPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0zMjcuOTQxLDEyMS42NThjLTEuMzk1LTQuMjg4LTUuMTAzLTcuNDE0LTkuNTY2LTguMDY0bC0zNS43NTgtNS4xOTZsLTE1Ljk5MS0zMi40MDIgICAgYy0xLjk5Ny00LjA0NC02LjExNi02LjYwNS0xMC42MjYtNi42MDVjLTQuNTExLDAtOC42MywyLjU2MS0xMC42MjYsNi42MDVsLTE1Ljk5MSwzMi40MDJsLTM1Ljc1OCw1LjE5NiAgICBjLTQuNDY0LDAuNjQ4LTguMTcyLDMuNzc1LTkuNTY2LDguMDY1Yy0xLjM5Myw0LjI5MS0wLjIzMSw4Ljk5OSwyLjk5OSwxMi4xNDhsMjUuODc1LDI1LjIyMWwtNi4xMDksMzUuNjEzICAgIGMtMC43NjMsNC40NDYsMS4wNjQsOC45MzgsNC43MTQsMTEuNTljMy42NDgsMi42NTEsOC40ODcsMywxMi40NzksMC45MDJMMjU2LDE5MC4zMmwzMS45ODIsMTYuODEzICAgIGMxLjczNCwwLjkxMSwzLjYyNywxLjM2LDUuNTEyLDEuMzZjMi40NTYsMCw0LjkwMi0wLjc2Myw2Ljk2Ni0yLjI2M2MzLjY1LTIuNjUyLDUuNDc3LTcuMTQ0LDQuNzE0LTExLjU5bC02LjEwOS0zNS42MTMgICAgbDI1Ljg3NS0yNS4yMjFDMzI4LjE3MiwxMzAuNjU4LDMyOS4zMzQsMTI1Ljk0OSwzMjcuOTQxLDEyMS42NTh6IE0yNzguMDY0LDE0Ni40MDVjLTIuNzkzLDIuNzIyLTQuMDY4LDYuNjQ0LTMuNDA4LDEwLjQ4OSAgICBsMy4xMDIsMTguMDlsLTE2LjI0NS04LjU0MWMtMS43MjUtMC45MDgtMy42Mi0xLjM2LTUuNTE0LTEuMzZjLTEuODk0LDAtMy43ODgsMC40NTQtNS41MTQsMS4zNmwtMTYuMjQ1LDguNTQxbDMuMTAyLTE4LjA5ICAgIGMwLjY2LTMuODQ0LTAuNjE1LTcuNzY2LTMuNDA4LTEwLjQ4OWwtMTMuMTQxLTEyLjgxbDE4LjE2Mi0yLjY0YzMuODU5LTAuNTYsNy4xOTYtMi45ODUsOC45MjItNi40ODJsOC4xMjMtMTYuNDU4bDguMTIyLDE2LjQ1OCAgICBjMS43MjcsMy40OTcsNS4wNjIsNS45MjEsOC45MjIsNi40ODJsMTguMTYyLDIuNjRMMjc4LjA2NCwxNDYuNDA1eiIgZmlsbD0iI0ZGREE0NCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" />
+              </div>
+              <div style="display:inline-block;width:10%;text-align:right;">
+                {{sortCard.kudoTeam}}  
+              </div>
+              
+              <div style="vertical-align:middle;display:inline-block;width:70%;padding-left:10px;"> &gt; {{sortCard.title}}</div>
+            </div>
+          </template>
+        </iron-collapse>
+      </paper-card>
+
+      
+    </div>
+
+    <div class="resultFeedback">
+      <h3>Ranking por Votación</h3>
+      <span id="numUsers">(Número de usuarios: {{numUsers}})</span>
+      <template is="dom-repeat" items="{{users}}" as="user">
+        <div>
+          <div class="personItem" tabindex$="[[tabIndex]]">
+            <iron-image class="avatar" sizing="contain" src="[[user.picture]]"></iron-image>
+            <div class="pad">
+              <div class="primary">[[user.name]]</div>
+              <address>
+                <div class="userSection">Feedbacks: [[user.numFeedback]]</div>
+                <template is="dom-if" if="{{withKudos}}">
+                  <div class="userSection">Kudos: [[user.numKudos]]</div>
+                </template>
+                <div class="userSection">Stars: [[user.numStars]]</div>
+              </address>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </iron-pages>
+    <paper-dialog id="commentDialog" style="background: #f2f3f5;margin: 6px;">
+      <div id="commentDialogTitle" class="display_inline" style="font-weight: bold;">Comments</div>
+      <paper-dialog-scrollable>
+        <ul>
+          <div id="commentsList" style="text-align: left;"></div>  
+        </ul>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </paper-dialog>
+</template>
+<script>
+ Polymer({
+    is: 'kudos-stats',
+    properties: {
+      activeEvent   : { type: String, notify:true },
+      cards         : { type: Array, notify:true },
+      users         : { type: Array, notify:true },
+      listUsers     : { type: Object, notify:true },
+      numUsers      : { type: String, notify:true },
+      selected      : { value: 0 },
+      display       : { value: "block" },
+      sortedRating  : { type: Array, notify:true },
+      sortedCustomer: { type: Array, notify:true },
+      sortedThink   : { type: Array, notify:true },
+      sortedTeam    : { type: Array, notify:true },
+      withKudos     : { type:Boolean, value:false, notify:true},
+      withFeedback  : { type:Boolean, value:false, notify:true},
+      membersJury   : { type: String, notify:true },
+      factorJury   : { type: Number, value:0.0,notify:true },
+      arrComments   : { type: Array, notify:true},
+    },
+    getCards:function(){
+      var ref = firebase.database().ref(this.activeEvent + "/blocks");
+      var self = this;
+      self.sortedRating = [];
+      self.sortedCustomer = [];
+      self.sortedThink = [];
+      self.sortedTeam = [];
+      ref.once('value',function(snapshot) {
+        snapshot.forEach(function(child) {
+          var block = child.val();
+          for (var idCard in block.cards) {
+            
+            var card        = {};
+            card            = block.cards[idCard];
+            card.id         = idCard;
+            
+            card.titleBlock     = block.title;
+            card.color          = block.color;
+            card.kudoCustomer   = 0;
+            card.kudoThink      = 0;
+            card.kudoTeam       = 0;
+            card.averageRating  = 0;
+            card.usersRating    = 0;
+            card.orderRating    = 0;
+            
+            var _contadorJury   = 0;
+            var _contadorPublic = 0;
+            var _kudoCustomer   = 0;
+            var _kudoThink      = 0;
+            var _kudoTeam       = 0;
+            var _publicVote     = 0;
+            var _juryVote       = 0;
+            
+            if (block.cards[idCard]['voters'] != undefined ){
+              var vote = block.cards[idCard]['voters'];
+              for (var prop in vote) {
+                for (var votacion in block.cards[idCard]['voters'][prop]) {
+                  if(prop=='customerFirst'){
+                    _kudoCustomer=_kudoCustomer+1;
+                  }else if(prop=='thinkBig'){
+                    _kudoThink=_kudoThink+1;
+                  }else if(prop=='oneTeam'){
+                    _kudoTeam=_kudoTeam+1;
+                  }else{
+                    continue;
+                  }
+                }
+              }
+            }
+            
+            if (block.cards[idCard]['rating'] != undefined){
+              var votersRating = block.cards[idCard]['rating'];
+              for (var voter in votersRating) {
+                var lista=self.membersJury.toString().replace(/[@.]/g,'_');;
+                var tipo = lista.indexOf(voter);
+                
+                if(tipo<0){
+                  _publicVote =_publicVote  + block.cards[idCard]['rating'][voter];  
+                  _contadorPublic++;
+                }else{
+                  _juryVote   =_juryVote    + block.cards[idCard]['rating'][voter];
+                  _contadorJury++;
+                }
+              }
+            }
+            
+            card.withFeedback=false;
+            if(card.comments){
+              card.withFeedback=true;
+            }
+            let _average=0.0;
+            let _averageJury=0.0;
+            let _averagePublic=0.0;
+            card.usersRating =_contadorJury+_contadorPublic;
+            
+            _averageJury    =(_publicVote/_contadorPublic)*0.5;
+            _averagePublic  =(_juryVote/_contadorJury)*0.5;
+            
+            card.averagePublic=_averageJury.toFixed(2);
+            card.averageJury=_averagePublic.toFixed(2);
+            if(_contadorJury==0){_contadorJury=1;}
+            if(_contadorPublic==0){_contadorPublic=1;}
+            
+            _average=(_publicVote/_contadorPublic)*0.5 + (_juryVote/_contadorJury)*0.5;
+            card.averageRating=_average.toFixed(2);
+            card.orderRating  = parseInt(_average.toFixed(2)*100.00,10);
+            card.kudoCustomer=_kudoCustomer;
+            card.kudoThink   =_kudoThink;
+            card.kudoTeam    =_kudoTeam;
+            self.push('sortedRating', card);
+            self.push('sortedCustomer', card);
+            self.push('sortedThink', card);
+            self.push('sortedTeam', card);
+          }
+        });
+        self.sortedRating.sort(function(a,b) {
+            return (a.orderRating > b.orderRating) ? -1 : ((b.orderRating > a.orderRating) ? 1 : 0);} );
+        
+        self.sortedCustomer.sort(self.compareValues('kudoCustomer','desc'));
+        
+        self.sortedThink.sort(self.compareValues('kudoThink','desc'));
+      
+        self.sortedTeam.sort(self.compareValues('kudoTeam','desc'));
+        
+      });
+      this.$.blockRating.opened=false;
+      this.$.blockCustomer.opened=false;
+      this.$.blockTeam.opened=false;
+      this.$.blockThink.opened=false;
+    },
+    compareValues:function(key, order='asc') {
+      return function(a, b) {
+        if(!a.hasOwnProperty(key) || 
+           !b.hasOwnProperty(key)) {
+      	  return 0; 
+        }
+        
+        const varA = (typeof a[key] === 'string') ? 
+          a[key].toUpperCase() : a[key];
+        const varB = (typeof b[key] === 'string') ? 
+          b[key].toUpperCase() : b[key];
+          
+        let comparison = 0;
+        if (varA > varB) {
+          comparison = 1;
+        } else if (varA < varB) {
+          comparison = -1;
+        }
+        return (
+          (order == 'desc') ? 
+          (comparison * -1) : comparison
+        );
+      };
+    },
+    getComments:function(e){
+      var cardChosen = Polymer.dom(e).localTarget;
+      var lista="";
+      if(cardChosen.data){
+        lista="";
+        var comentarios=cardChosen.data.comments;
+        for (var comment in comentarios){
+          lista=lista+"<div style='padding:5px;background:#fff;border-radius: 18px'><b style='color:#365899'>" + comment + "</b>  " + comentarios[comment].message +"</div><br>";
+        }
+      }
+      this.$.commentDialogTitle.innerHTML=cardChosen.data.title;
+      this.$.commentsList.innerHTML=lista;
+      this.$.commentDialog.open();
+    },
+    getRanking:function() {
+      var self=this;
+      firebase.database().ref(this.activeEvent +'/users').once('value',function(snapshot) {
+        var users = snapshot.val();
+        self.set('listUsers',users);
+        var numUsers=0;
+        self.users=[];
+        for (var user in users) {
+          var _user={};
+          numUsers++;
+          _user.name=users[user].profile.name;
+          _user.picture=users[user].profile.picture;
+          var numKudos=0;
+          var numFeedback=0;
+          var numStars=0;
+          for (var block in users[user].feedback) {
+            for(var card in users[user].feedback[block]){
+              var vote = users[user].feedback[block][card];
+              for (var prop in vote) {
+                if (prop == 'comment') {
+                  for (var commentProps in users[user].feedback[block][card][prop]) {
+                    if (commentProps == 'message') {
+                      var message = users[user].feedback[block][card][prop][commentProps];
+                      if (message.toString().trim().length>1) {
+                        numFeedback++;
+                      }
+                    }
+                  }
+                } else if (prop == 'kudos') {
+                  var kudos = users[user].feedback[block][card]['kudos'];
+                  for (var kudo in kudos){
+                    if (kudos[kudo]){ numKudos++; }
+                  }
+                }else if(prop == 'rating'){
+                  var rating =0;
+                  if (users[user].feedback[block][card]['rating'] == null){ rating = 0;
+                  } else { rating = users[user].feedback[block][card]['rating']; }
+                  numStars = numStars + rating;
+                }
+              }
+            }
+          }
+          _user.numKudos=numKudos;
+          _user.numFeedback=numFeedback;
+          _user.numStars=numStars;
+          self.push('users',_user);
+        }
+        self.numUsers=numUsers;
+        self.users.sort(function(a,b) {
+           return (a.numFeedback > b.numFeedback) ? -1 : ((b.numFeedback > a.numFeedback) ? 1 : 0);} );
+        //self.users.sort(function(a,b) {
+        //  return (a.numStars > b.numStars) ? -1 : ((b.numStars > a.numStars) ? 1 : 0);} );
+      });
+
+    },
+    reloadFeedback:function(e) {
+      // this.getCards();
+      // this.getRanking();
+      this.renderAll();
+    },
+    renderAll:function(){
+      this.$.listRating.render();
+      this.$.listCustomer.render();
+      this.$.listThink.render();
+      this.$.listTeam.render();
+    },
+    unCollapse: function(e) {
+      if(e.target.dataset.selector!='undefined'){
+        this.$$(e.target.dataset.selector).toggle();  
+      }
+      this.renderAll();
+    }
+  });
+</script>
+</dom-module>

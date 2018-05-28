@@ -1,0 +1,158 @@
+<dom-module id="kudos-about">
+<link rel="import" href="../css/kudo-style.html">
+<template id="tmpkudoAbout">
+    <style include="about-estilo"></style>
+    <style include="kudos"></style>
+    <div class="card">
+        <h1>{{titulo}}</h1>
+        <p>{{titulo_des}}</p>
+        <h1>{{sub_titulo}}</h1>
+        <p>{{contenido_sub_titulo}}</p>
+        <paper-button id="kudoejemplo" class="kudo" toggles raised>
+         <iron-icon icon="{{kudo.icon}}"></iron-icon> {{kudo.title}}
+        </paper-button><span>{{sub_contenido}}</span>
+        <h1>{{titulo_secundario}}</h1>
+        <template id="kudos-disponibles" is="dom-repeat" items="{{kudos}}" as="kudo">
+            <paper-button id="{{kudo.id}}" class="kudo" on-click="describirKudo" toggles raised>
+              <iron-icon  icon="{{kudo.icon}}"></iron-icon> {{kudo.title}}
+            </paper-button>
+        </template>
+        <template is="dom-if" if="{{descripcionVisible}}">
+         <div style="padding-left: 7px;">
+           <span style="color: #0079C1; font-weight: bold;">Se agradece al equipo por:<br>{{descripcion}}</span>
+         </div>
+        </template>
+        <br>
+        <h1>¿Y los culpables? ¡Que pasen los <b>Devnovators</b>!</h1>
+        <div>
+            <template id="team-member" is="dom-repeat" items="{{members}}" as="member">
+              <template is="dom-if" if="{{verifyPic(member.pic)}}">
+                <div class="member">
+                  <div><img src="../images/devs/{{member.pic}}" class="image"></div>
+                  <div><span style="color:#0072BB; font-size:1em; font-weight:500;">{{member.name}}</span></div>
+                </div>
+              </template>
+            </template>
+        </div>
+        <div><img src="../images/devnovators.jpg" class="photo"></div>
+        <div><span style="color:#0072BB; font-size:1em; font-weight:500;">Devnovators - Perú 2017</span></div>
+    </div>
+</template>
+
+<script>
+ Polymer({
+    is: 'kudos-about',
+    properties: {
+      titulo:{
+         type: String,
+         notify: true,
+         value: "¿Qué es BBVA Kudos?"
+      },
+      titulo_des: {
+          type: String,
+          notify: true,
+          value: "Es un espacio digital, creado por Devnovators (Perú) en una Hackathon, que busca conectar a la comunidad BBVA con los proyectos estratégicos a través de agradecimientos (kudos), feedback (comentarios), valoración (estrellas) y preguntas (chatbot) para la mejora continua de los mismos"
+      },
+      sub_titulo:{
+          type:String,
+          notify: true,
+          value: "¿Cómo agradecer (entregar kudo) a un proyecto?"
+      },
+      contenido_sub_titulo:{
+          type: String,
+          notify: true,
+          value: "Es muy sencillo: "+
+                 "Basta con elegir los atributos "+
+                 "que te sorprendieron de cada proyecto."
+      },
+      sub_contenido: {
+         type: String,
+         notify: true,
+         value:"(Ejemplo de atributo)."
+      },
+      titulo_secundario:{
+          type: String,
+          notify: true,
+          value: "¿Qué kudos están disponibles?"
+      },
+      activeEvent:{
+          type:String,
+          notify: true,
+          value: ""
+      },
+      kudos: {
+          type: Array,
+          notify: true,
+          value:[]
+      },
+      members:{
+          type: Array,
+          notify: true,
+          value:[]
+      },
+      kudo: {
+          type:Object,
+          notify: true,
+          value: function() { return {}; }
+      },
+      member: {
+          type:Object,
+          notify: true,
+          value: function() { return {}; }
+      },
+    },
+    ready: function(){},
+    attached: function(){
+        // this.getKudos();
+        // this.getMember();
+    },
+    verifyPic:function(picture){
+      if(picture!=null)return true
+      return false;
+    },
+    getKudos: function(){
+        var about = this;
+        var pathKudos = this.activeEvent+"/kudos";
+        about.kudos = [];
+        firebase.database().ref(pathKudos).once('value').then(function(listado) {
+          listado.forEach(function(child) {
+            var kudo = child.val();
+            kudo.id=child.key;
+            about.push('kudos', kudo);
+          });
+          if(about.kudos){
+             about.set('kudo', about.kudos[0]);
+          }
+        });
+    },
+    getMember: function(){
+        var about = this;
+        about.members = [];
+        var pathDevs = this.activeEvent+"/devs";
+        firebase.database().ref(pathDevs).once('value').then(function(listado) {
+          listado.forEach(function(child) {
+            var member = child.val();
+            about.push('members', member);
+          });
+        });
+    },
+    describirKudo: function(event) {
+        var kudoSeleccionado = event.model['__data__'];
+        var idKudo = kudoSeleccionado.kudo.id;
+        var idBtnKudo = this.$$('#'+idKudo);
+        if(idBtnKudo != this.botonSeleccionado){
+          if(this.botonSeleccionado != null) {
+            this.botonSeleccionado.active = false;
+          }
+        } else {
+          this.botonSeleccionado = {};
+        }
+        this.botonSeleccionado = idBtnKudo;
+        this.descripcionVisible = idBtnKudo.active;
+        if(idBtnKudo.active){
+          this.descripcion = kudoSeleccionado.kudo.description;
+        }
+    }
+  });
+</script>
+</dom-module>

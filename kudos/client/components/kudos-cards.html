@@ -1,0 +1,261 @@
+<link rel="import" href="../bower_components/star-rating/star-rating.html">
+<dom-module id="kudos-cards">
+  <link rel="import" href="../css/kudo-style.html">
+  <template>
+    <style include="cards"></style>
+    <style include="kudos"></style>
+    <!-- Bienvenida -->
+    <div style="display:table">
+      <img id="imgProfile" class="avatar" src="{{userPicture}}">
+      <div style="display:table-cell;vertical-align:middle"> ¡Bienvenido | добро пожаловать <span style="color:#448081;">{{userFirstName}}</span>!</div>
+    </div>
+    <!-- Lista de Bloques -->
+    <template id="arrBlocks" is="dom-repeat" items="{{blocks}}" as="block">
+      <paper-card style="width:95%">
+        <div>
+          <div class$="rate-header titleProject PGMINI {{block.id}}" style$="height:40px;" on-click="unCollapse" data-args$="[[block.id]]">
+            &gt;<span class="titleBlock" data-args$="[[block.id]]">{{block.title}}</span>
+          </div>
+        </div>
+        <iron-collapse id="clp_[[block.id]]" style="width:100%;">
+          <!-- Lista de Tarjetas x Bloque -->
+          <template id="arrCards" is="dom-repeat" items="{{_getCards(block)}}" as="card">
+            <paper-card class="rate">
+              <div class="rate-content">
+                <div>
+                  <div class="rate-header titleProject" style$="background:{{card.color}}">
+                    {{card.title}}
+                  </div>
+                  <div class="rate-name">
+                    <div class="div_middle">
+                      <div><b>Descripción:</b> {{card.description}}</div>
+                      <template is="dom-if" if="{{card.sdacode}}">
+                        <div><b>SDACODE:</b> {{card.sdacode}}</div>
+                      </template>
+                      <template is="dom-if" if="{{card.kpi}}">
+                        <div><b>Meta:</b> {{card.kpi}}</div>
+                      </template>
+                      <template is="dom-if" if="{{card.mvp}}">
+                        <div><b>MVP:</b> {{card.mvp}}</div>
+                      </template>
+                      <div><a href="[[card.linkValue]]" target="_blank">[[card.linkLabel]]</a></div>
+                    </div>
+                    <div class="div_feedback">
+                      <paper-button class="rate-icon bot" id="{{card.id}}" data='{{card}}' on-click="openBot" style$="display:[[card.withChat]]">
+                        Chatbot<iron-icon icon="communication:live-help" data='{{card}}'></iron-icon>
+                      </paper-button>
+                      <template is="dom-if" if="{{withFeedback}}">
+                        <paper-button class="rate-icon feeback" id="{{card.id}}" data='{{card}}' on-click="openModal">
+                          Feedback <iron-icon icon="announcement" data='{{card}}'></iron-icon>
+                        </paper-button>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-actions kudos-button">
+                  <div class="valoracion-star">
+                    <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
+                    {{getRatingCardUser(card.block,card.id)}}
+                  </div>
+                  <template is="dom-if" if="{{withKudos}}">
+                    <template id="tmtKudo" is="dom-repeat" items="{{kudos}}" as="kudo">
+                      {{getKudosUser(card.block,card.id,kudo.id)}}
+                      <div class$="kudo_base [[kudo.id]]" id="id_img_{{card.id}}_{{kudo.id}}" on-click="_assess" data='{{card}}' dataKudo='{{kudo.id}}'>&nbsp;</div>
+                      <paper-tooltip for="id_img_{{card.id}}_{{kudo.id}}" position="top" style="max-width:100px;">{{kudo.description}}</paper-tooltip>
+                    </template>
+                  </template>
+                </div>
+              </div>
+            </paper-card>
+          </template>
+        </iron-collapse>
+      </paper-card>
+    </template>
+    <paper-dialog id="feedback" >
+      <h2 id="titleFeedback">Quick feedback for:</h2>
+      <paper-textarea id="txtFeedback" label="Escribe tu feedback..."></paper-textarea>
+      <div class="buttons">
+        <paper-button id="btnFeedback" on-click="sendFeedback" autofocus>Enviar</paper-button>
+        <paper-button dialog-dismiss>Cancelar</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-toast id="toastAlert" text="Gracias por tu feedback"></paper-toast>
+  </template>
+  <script>
+      Polymer({
+        is: 'kudos-cards',
+        properties:{
+          activeEvent     : {type:String, notify:true},
+          user            : {type:Object, notify:true},
+          userFirstName   : {type:String, notify:true},
+          userEmail       : {type:String, notify:true},
+          userName        : {type:String, notify:true},
+          userPicture     : {type:String, notify:true},
+          error           : {type:Object, value:null, notify:true },
+          cards           : {type:Array, notify:true},
+          blocks          : {type:Array, notify:true},
+          kudos           : {type:Array, notify:true},
+          withKudos       : {type:Boolean, value:false, notify:true},
+          withFeedback    : {type:Boolean, value:false, notify:true},
+          numStars        : {type:Number, notify:true},
+        },
+        unCollapse: function(e) {
+          this.$$('#clp_'+e.target.dataset.args).toggle();
+        },
+        getKudos:function(){
+          var self = this;
+          firebase.database().ref(this.activeEvent + '/kudos').once('value').then(function(snapshot) {
+            self.kudos = [];
+            snapshot.forEach(function(child) {
+              var kudo = child.val();
+              kudo.id=child.key;
+              self.push('kudos', kudo);
+            });
+            });
+        },
+        getBlocks:function(){
+          var ref = firebase.database().ref(this.activeEvent + "/blocks");
+          var self = this;
+          ref.once("value").then(function(snapshot) {
+            self.blocks = [];
+            snapshot.forEach(function(child) {
+              var block = child.val();
+              block.id  = child.key;
+              self.push('blocks', block);
+            });
+          });
+        },
+        _getCards:function(block){
+          this.cards = [];
+          self = this;
+          for (var card in block.cards) {
+            var newCard = { id:card, title:block.cards[card].title, description:block.cards[card].description,
+              leader:block.cards[card].leader, color:block.cards[card].color, withChat:block.cards[card].withChat, 
+              linkLabel:block.cards[card].linkLabel, linkValue:block.cards[card].linkValue, kpi:block.cards[card].kpi, 
+              sdacode: block.cards[card].sdacode, mvp: block.cards[card].mvp};
+            //parameters
+            newCard.objetivo        =block.cards[card].parameters.objetivo;
+            newCard.detalles        =block.cards[card].parameters.detalles;
+            newCard.metrica         =block.cards[card].parameters.metrica;
+            newCard.customer        =block.cards[card].parameters.customer;
+            newCard.canal           =block.cards[card].parameters.canal;
+            newCard.ambiente        =block.cards[card].parameters.ambiente;
+            newCard.ambiente_fecha  =block.cards[card].parameters.ambiente_fecha;
+            newCard.tiempo          =block.cards[card].parameters.tiempo;
+            newCard.participantes   =block.cards[card].parameters.participantes;
+            newCard.diferencias     =block.cards[card].parameters.diferencias;
+            newCard.limitaciones    =block.cards[card].parameters.limitaciones;
+            newCard.marketing       =block.cards[card].parameters.marketing;
+            newCard.block           =block.id;
+            self.push('cards', newCard);
+          }
+          return this.cards;
+        },
+        openBot:function(e){
+          var btnCard = Polymer.dom(e).localTarget;
+          this.fire('showChatbot', btnCard);
+        },
+        openModal:function(e){
+          var btnCard = Polymer.dom(e).localTarget;
+          var card = btnCard.data;
+          var self=this;
+          this.$.txtFeedback.value="";
+          this.$.btnFeedback.data=card;
+          this.$.titleFeedback.innerHTML="Quick feedback for:<br>" + card.title;
+          this.$.feedback.open();
+          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail+ "/feedback/"+ card.block +"/" + card.id + "/comment");
+          ref.once('value').then(function(snapshot) {
+            var msg="";
+            if(snapshot.val()!=null){
+              msg=snapshot.val().message;
+            }
+            self.$.txtFeedback.value=msg;
+          });
+        },
+        sendFeedback:function(){
+          var db = firebase.database();
+          var card=this.$.btnFeedback.data;
+          var msg=this.$.txtFeedback.value;
+          if(msg.trim().length==0){this.$.feedback.close();return;}
+          var ref = db.ref(this.activeEvent + "/users/" + this.userEmail + "/feedback");
+          var postData = {
+            message: msg
+          };
+          var updates = {};
+          updates["/"+ card.block + "/" + card.id + "/comment"] = postData;
+          ref.update(updates);
+          this.$.txtFeedback.value="";
+          this.$.feedback.close();
+          this.$.toastAlert.open();
+        },    
+        getKudosUser:function(idBlock,idCard,idKudo){
+          self=this;
+          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail + "/kudos/"+ idBlock +"/" + idCard + "/" + idKudo);
+          ref.once('value').then(function(snapshot) {
+            if(snapshot.val()!=null){
+              if(snapshot.val()==true){
+                var kudo=self.$$('#id_img_' +idCard +'_' +idKudo);
+                kudo.classList.add('kudo_enable');
+              }
+            }
+          });
+        },
+        getRatingCardUser:function(idBlock,idCard){
+          self=this;
+          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail + "/feedback/"+ idBlock + "/" + idCard + "/rating");
+          ref.once('value').then(function(snapshot) {
+            var numStars=0;
+            if(snapshot.val()!=null){
+              numStars=snapshot.val();
+              self.stars=numStars;
+            }
+            self.$$('#star_' +idCard).rate=numStars;
+          });
+        },
+        _assess:function(e) {
+          var kudoSeleccionado = Polymer.dom(e).localTarget;
+          var _card = kudoSeleccionado.data;
+          var idKudo = kudoSeleccionado.datakudo;
+          var idCard  = _card.id;
+          var idBlock = _card.block;
+          var idBtnKudo=this.$$('#id_img_' +idCard +'_' +idKudo);
+          
+          
+          var refControl = firebase.database().ref(this.activeEvent +'/users').child(this.userEmail+"/kudos");
+          var refCard=firebase.database().ref(this.activeEvent +'/blocks/'+  idBlock + '/cards/' + idCard +'/voters');
+          if(idBtnKudo.classList.toggle('kudo_enable')) {
+            idBtnKudo.classList.remove("kudo_disable");
+            var updates = {};
+            var updatesVotersbyKudo ={};
+            updates["/" + idBlock + "/" + idCard + "/" + idKudo] = true;
+            updatesVotersbyKudo["/" + idKudo + "/" + this.userEmail]=true;
+            refControl.update(updates);
+            refCard.update(updatesVotersbyKudo);
+          } else {
+            idBtnKudo.classList.add('kudo_disable');
+            firebase.database().ref(this.activeEvent +'/users').child(this.userEmail).child("/kudos/"+idBlock).child(idCard).child(idKudo).remove();
+            firebase.database().ref(this.activeEvent + '/blocks/' + idBlock + '/cards/'+ idCard +'/voters/' + idKudo + '/'+ this.userEmail).remove();
+          }
+        },
+        _putStars:function(e) {
+          var data = e.model['__data__'];
+          var idCard = data.card.id;
+          var idBlock = data.card.block;
+          var ratingCard = this.$$('#star_' + idCard).rate;
+          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail+"/feedback");
+          var refCard=firebase.database().ref(this.activeEvent +'/blocks/'+  idBlock + '/cards/' + idCard +'/rating');
+          if (ratingCard>0){
+            var updates = {};
+            var updatesRating ={};
+            updates["/" + idBlock + "/" + idCard + "/rating"] = ratingCard;
+            updatesRating["/" + this.userEmail]=ratingCard;
+            ref.update(updates);
+            refCard.update(updatesRating);
+          }else{
+            firebase.database().ref(this.activeEvent +'/users').child(this.userEmail).child("/feedback/"+idBlock).child(idCard).child('rating').remove();
+            firebase.database().ref(this.activeEvent + '/blocks/' + idBlock + '/cards/'+ idCard +'/rating/'+ this.userEmail).remove();
+          }
+        }
+      });
+    </script>
+</dom-module>
