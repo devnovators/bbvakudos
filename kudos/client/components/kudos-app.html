@@ -52,7 +52,7 @@
         }
         app-header {
             color: #fff;
-            background-color: #a50203;
+            background-color: #0051a3;
         }
         app-header paper-icon-button {
             --paper-icon-button-ink-color: white;
@@ -77,14 +77,17 @@
             </paper-button>
         </div>
         <div hidden$="{{!logged}}" width="100%" style="text-align:center;">
-            <app-header-layout>
-                <app-header fixed>
+            <app-header-layout >
+                <app-header fixed style$="background:[[eventBgColor]]">
                     <app-toolbar>
                         <paper-icon-button icon="arrow-back" id="mBack" on-tap="closeChatbot" style="display:none"></paper-icon-button>
                         <div>
+                            <img src="[[eventLogo]]" width="40px" height="40px">
+                        </div>
+                        <div>
                             <span style="font-size: 3.0vmin;" class="logo">KUDOSKY</span> | <span style="font-size:13px !important;">[[eventName]]</span>
                         </div>
-                        <iron-icon icon="icons:events"></iron-icon>
+                        
                         <div main-title></div>
                         <paper-icon-button icon="view-list"   id="mAgenda" title="Tarjetas"     on-tap="showCards"></paper-icon-button>
                         <paper-icon-button icon="assessment"  id="mStats"  title="Estadísticas" on-tap="showStats"></paper-icon-button>
@@ -115,7 +118,9 @@
                 userName    : { type : String, notify : true },
                 userPicture : { type : String, notify : true },
                 activeEvent : { type : String, notify : true },
-                eventName   : { type : String, notify : true, value : "BBVA" }   // Event Title
+                eventName   : { type : String, notify : true, value : "BBVA" },   // Event Title
+                eventLogo   : { type : String, notify : true},
+                eventBgColor: { type : String, notify : true},
             },
             _userEmailChanged:function(newVal, oldVal) {
                 //console.log('_userEmailChanged newVal:'+newVal+' oldVal:'+oldVal);
@@ -123,10 +128,12 @@
             ready:function() {
                 this.addEventListener('showChatbot', this.showChatbot);
                 firebase.initializeApp({
-                    apiKey: "AIzaSyBiBdm3MheV4sN7lfk0WLoVDtXXxHxbbvk",
-                    authDomain: "devnovators.firebaseapp.com",
-                    databaseURL: "https://devnovators.firebaseio.com",
-                    storageBucket: "devnovators.appspot.com",
+                    apiKey: "AIzaSyCQgB2pehO3brhVrS6xhd-DKBx0NWV6CfE",
+                    authDomain: "bbva-kudos.firebaseapp.com",
+                    databaseURL: "https://bbva-kudos.firebaseio.com",
+                    projectId: "bbva-kudos",
+                    storageBucket: "bbva-kudos.appspot.com",
+                    messagingSenderId: "962944540684"
                 });
                 var parent = this;
                 firebase.auth().onAuthStateChanged(function(account) {
@@ -149,8 +156,9 @@
                         parent.set('userName', parent.$.cards.userName);
                         parent.set('userPicture', parent.$.cards.userPicture);
                         parent.set('logged', true);
-                        firebase.database().ref("activeEvent").once("value").then(function(snapshot) {
-                            var activeEvent = 'events/' + snapshot.val(); //console.log('activo:'+activo);
+                        //firebase.database().ref("activeEvent").once("value").then(function(snapshot) {
+                            //var activeEvent = 'events/' + snapshot.val(); //console.log('activo:'+activo);
+                            var activeEvent = 'events/PE_PI_INI'; //console.log('activo:'+activo);
                             parent.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
                             parent.$.cards.activeEvent = activeEvent;
                             parent.$.stats.activeEvent = activeEvent;
@@ -158,21 +166,31 @@
                             parent.$.about.getKudos();
                             parent.$.about.getMember();
                             firebase.database().ref(activeEvent).once("value").then(function(snapshot) {
-                                parent.set('eventName', snapshot.val().parameters.name); 
-                                if (snapshot.val().parameters.withKudos=='true'){
+                                parent.set('eventName', snapshot.val().attributes.name); 
+                                if (snapshot.val().attributes.withStars=='true'){
+                                    parent.$.cards.withStars=true;
+                                    parent.$.stats.withStars=true;
+                                }
+                                if (snapshot.val().attributes.withKudos=='true'){
                                     parent.$.cards.withKudos=true;
                                     parent.$.stats.withKudos=true;
                                 }
-                                if (snapshot.val().parameters.withFeedback=='true'){
+                                if (snapshot.val().attributes.withFeedback=='true'){
                                     parent.$.cards.withFeedback=true;
                                     parent.$.stats.withFeedback=true;
                                 }
-                                parent.$.cards.numStars=snapshot.val().parameters.numStars;
+                                parent.$.cards.numStars=snapshot.val().attributes.numStars;
                                 parent.$.cards.getKudos();
                                 parent.$.cards.getBlocks();
                                 
-                                parent.$.stats.membersJury=snapshot.val().parameters.membersJury;
-                                parent.$.stats.factorJury=snapshot.val().parameters.factorJury;
+                                parent.$.stats.membersJury=snapshot.val().attributes.membersJury;
+                                parent.$.stats.factorJury=snapshot.val().attributes.factorJury;
+                                
+                                parent.set("eventLogo",snapshot.val().attributes.eventLogo);
+                                parent.set("eventBgColor",snapshot.val().attributes.eventBgColor);
+                                
+                                parent.$.cards.eventBgImage=snapshot.val().attributes.eventBgImage;
+                                
                                 parent.showCards();
                             });
                             var updates = {};
@@ -183,9 +201,10 @@
                             var ref = firebase.database().ref(activeEvent + "/users/" + parent.$.cards.userEmail  );
                             updates["/profile"] = userData;
                             ref.update(updates);
-                        });
+                        //});
                     }
                 });
+                
             },
             signInWithGoogle:function() {
                 if (!firebase.auth().currentUser) {

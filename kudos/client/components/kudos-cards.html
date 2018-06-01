@@ -7,13 +7,13 @@
     <!-- Bienvenida -->
     <div style="display:table">
       <img id="imgProfile" class="avatar" src="{{userPicture}}">
-      <div style="display:table-cell;vertical-align:middle"> ¡Bienvenido | добро пожаловать <span style="color:#448081;">{{userFirstName}}</span>!</div>
+      <div style="display:table-cell;vertical-align:middle"> ¡Bienvenido <span style="color:#448081;">{{userFirstName}}</span>!</div>
     </div>
     <!-- Lista de Bloques -->
     <template id="arrBlocks" is="dom-repeat" items="{{blocks}}" as="block">
       <paper-card style="width:95%">
         <div>
-          <div class$="rate-header titleProject PGMINI {{block.id}}" style$="height:40px;" on-click="unCollapse" data-args$="[[block.id]]">
+          <div style$="height:40px;background-color:{{block.bgcolor}};background-image:url([[eventBgImage]])" class$="rate-header titleProject PGMINI {{block.id}}" style$="height:40px;background-color:{{block.bgcolor}}" on-click="unCollapse" data-args$="[[block.id]]">
             &gt;<span class="titleBlock" data-args$="[[block.id]]">{{block.title}}</span>
           </div>
         </div>
@@ -23,7 +23,7 @@
             <paper-card class="rate">
               <div class="rate-content">
                 <div>
-                  <div class="rate-header titleProject" style$="background:{{card.color}}">
+                  <div class="rate-header titleProject" style$="background:{{card.bgcolor}}">
                     {{card.title}}
                   </div>
                   <div class="rate-name">
@@ -53,10 +53,12 @@
                   </div>
                 </div>
                 <div class="card-actions kudos-button">
-                  <div class="valoracion-star">
-                    <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
-                    {{getRatingCardUser(card.block,card.id)}}
-                  </div>
+                  <template is="dom-if" if="{{withStars}}">
+                    <div class="valoracion-star">
+                      <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
+                      {{getRatingCardUser(card.block,card.id)}}
+                    </div>
+                  </template>
                   <template is="dom-if" if="{{withKudos}}">
                     <template id="tmtKudo" is="dom-repeat" items="{{kudos}}" as="kudo">
                       {{getKudosUser(card.block,card.id,kudo.id)}}
@@ -97,6 +99,8 @@
           kudos           : {type:Array, notify:true},
           withKudos       : {type:Boolean, value:false, notify:true},
           withFeedback    : {type:Boolean, value:false, notify:true},
+          withStars       : {type:Boolean, value:false, notify:true},
+          eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
         },
         unCollapse: function(e) {
@@ -130,22 +134,22 @@
           self = this;
           for (var card in block.cards) {
             var newCard = { id:card, title:block.cards[card].title, description:block.cards[card].description,
-              leader:block.cards[card].leader, color:block.cards[card].color, withChat:block.cards[card].withChat, 
+              leader:block.cards[card].leader, bgcolor:block.cards[card].bgcolor, withChat:block.cards[card].withChat, 
               linkLabel:block.cards[card].linkLabel, linkValue:block.cards[card].linkValue, kpi:block.cards[card].kpi, 
               sdacode: block.cards[card].sdacode, mvp: block.cards[card].mvp};
             //parameters
-            newCard.objetivo        =block.cards[card].parameters.objetivo;
-            newCard.detalles        =block.cards[card].parameters.detalles;
-            newCard.metrica         =block.cards[card].parameters.metrica;
-            newCard.customer        =block.cards[card].parameters.customer;
-            newCard.canal           =block.cards[card].parameters.canal;
-            newCard.ambiente        =block.cards[card].parameters.ambiente;
-            newCard.ambiente_fecha  =block.cards[card].parameters.ambiente_fecha;
-            newCard.tiempo          =block.cards[card].parameters.tiempo;
-            newCard.participantes   =block.cards[card].parameters.participantes;
-            newCard.diferencias     =block.cards[card].parameters.diferencias;
-            newCard.limitaciones    =block.cards[card].parameters.limitaciones;
-            newCard.marketing       =block.cards[card].parameters.marketing;
+            // newCard.objetivo        =block.cards[card].parameters.objetivo;
+            // newCard.detalles        =block.cards[card].parameters.detalles;
+            // newCard.metrica         =block.cards[card].parameters.metrica;
+            // newCard.customer        =block.cards[card].parameters.customer;
+            // newCard.canal           =block.cards[card].parameters.canal;
+            // newCard.ambiente        =block.cards[card].parameters.ambiente;
+            // newCard.ambiente_fecha  =block.cards[card].parameters.ambiente_fecha;
+            // newCard.tiempo          =block.cards[card].parameters.tiempo;
+            // newCard.participantes   =block.cards[card].parameters.participantes;
+            // newCard.diferencias     =block.cards[card].parameters.diferencias;
+            // newCard.limitaciones    =block.cards[card].parameters.limitaciones;
+            // newCard.marketing       =block.cards[card].parameters.marketing;
             newCard.block           =block.id;
             self.push('cards', newCard);
           }
