@@ -117,7 +117,7 @@
                 userEmail   : { type : String, notify : true, observer : '_userEmailChanged' },
                 userName    : { type : String, notify : true },
                 userPicture : { type : String, notify : true },
-                activeEvent : { type : String, notify : true },
+                activeVotes : { type : Boolean, notify : true },
                 eventName   : { type : String, notify : true, value : "BBVA" },   // Event Title
                 eventLogo   : { type : String, notify : true},
                 eventBgColor: { type : String, notify : true},
@@ -138,6 +138,8 @@
                 var parent = this;
                 firebase.auth().onAuthStateChanged(function(account) {
                     if (account) {
+                        console.info(account);
+                        
                         parent.set('user', account);
                         parent.set('userEmail', account.email);
                         if(account.displayName){
@@ -201,6 +203,15 @@
                             var ref = firebase.database().ref(activeEvent + "/users/" + parent.$.cards.userEmail  );
                             updates["/profile"] = userData;
                             ref.update(updates);
+                            
+                            firebase.database().ref(activeEvent+'/attributes/activeVotes').on('value', function(snapshot) {
+                                parent.set("activeVotes",snapshot.val());
+                                parent.$.cards.ActiveClassVotes='';
+                                parent.$.cards.activeVotes=snapshot.val();
+                                if(snapshot.val()==false){
+                                    parent.$.cards.ActiveClassVotes='kudo_opacity';
+                                }
+                            });
                         //});
                     }
                 });
