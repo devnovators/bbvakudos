@@ -257,6 +257,7 @@
                     idPreviousCard=snapshot.val();
                     var idBtnPreviousKudo=self.$$('#id_img_' +idPreviousCard +'_' +idKudo);
                     idBtnPreviousKudo.classList.add('kudo_disable');
+                    firebase.database().ref(self.activeEvent +'/logKudos/'+ idPreviousCard + "/" + idKudo + "/" + self.userEmail).remove();
                     //refKudosUser.set(idCard);
                   }
                   refKudosUser.set(idCard);
