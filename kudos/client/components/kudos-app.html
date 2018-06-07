@@ -84,11 +84,8 @@
                         <div>
                             <img src="[[eventLogo]]" width="40px" height="40px">
                         </div>
-                        <div>
-                            <span style="font-size: 3.0vmin;" class="logo">KUDOSKY</span> | <span style="font-size:13px !important;">[[eventName]]</span>
-                        </div>
                         
-                        <div main-title></div>
+                        <div main-title><span style="font-size: 3.0vmin;" class="logo">KUDOSKY</span> | <span style="font-size:13px !important;">[[eventName]]</span></div>
                         <paper-icon-button icon="view-list"   id="mAgenda" title="Tarjetas"     on-tap="showCards"></paper-icon-button>
                         <paper-icon-button icon="assessment"  id="mStats"  title="Estadísticas" on-tap="showStats"></paper-icon-button>
                         <paper-icon-button icon="help"        id="mHelp"   title="Acerca de"    on-tap="showAbout"></paper-icon-button>
@@ -112,7 +109,7 @@
         Polymer({
             is: 'kudos-app',
             properties: {
-                logged      : { type : Boolean, notify : true }, // Is Authenticated by Google?
+                logged      : { type : Boolean, notify : false }, // Is Authenticated by Google?
                 user        : { type : Object, notify : true },   // User Logged In
                 userEmail   : { type : String, notify : true, observer : '_userEmailChanged' },
                 userName    : { type : String, notify : true },
@@ -121,9 +118,13 @@
                 eventName   : { type : String, notify : true, value : "BBVA" },   // Event Title
                 eventLogo   : { type : String, notify : true},
                 eventBgColor: { type : String, notify : true},
+                admin       : { type : String, notify : true},
             },
             _userEmailChanged:function(newVal, oldVal) {
                 //console.log('_userEmailChanged newVal:'+newVal+' oldVal:'+oldVal);
+            },
+            _toggleCloseVotes:function(){
+                
             },
             ready:function() {
                 this.addEventListener('showChatbot', this.showChatbot);
@@ -139,6 +140,8 @@
                 firebase.auth().onAuthStateChanged(function(account) {
                     if (account) {
                         console.info(account);
+                        
+                        console.log("user id: " + firebase.auth().currentUser.uid);
                         
                         parent.set('user', account);
                         parent.set('userEmail', account.email);
@@ -160,62 +163,76 @@
                         parent.set('logged', true);
                         //firebase.database().ref("activeEvent").once("value").then(function(snapshot) {
                             //var activeEvent = 'events/' + snapshot.val(); //console.log('activo:'+activo);
-                            var activeEvent = 'events/PE_PI_INI'; //console.log('activo:'+activo);
-                            parent.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
-                            parent.$.cards.activeEvent = activeEvent;
-                            parent.$.stats.activeEvent = activeEvent;
-                            parent.$.about.activeEvent = activeEvent;
-                            parent.$.about.getKudos();
-                            parent.$.about.getMember();
-                            firebase.database().ref(activeEvent).once("value").then(function(snapshot) {
-                                parent.set('eventName', snapshot.val().attributes.name); 
-                                if (snapshot.val().attributes.withStars=='true'){
-                                    parent.$.cards.withStars=true;
-                                    parent.$.stats.withStars=true;
-                                }
-                                if (snapshot.val().attributes.withKudos=='true'){
-                                    parent.$.cards.withKudos=true;
-                                    parent.$.stats.withKudos=true;
-                                }
-                                if (snapshot.val().attributes.withFeedback=='true'){
-                                    parent.$.cards.withFeedback=true;
-                                    parent.$.stats.withFeedback=true;
-                                }
-                                parent.$.cards.numStars=snapshot.val().attributes.numStars;
-                                parent.$.cards.getKudos();
-                                parent.$.cards.getBlocks();
-                                
-                                parent.$.stats.membersJury=snapshot.val().attributes.membersJury;
-                                parent.$.stats.factorJury=snapshot.val().attributes.factorJury;
-                                
-                                parent.set("eventLogo",snapshot.val().attributes.eventLogo);
-                                parent.set("eventBgColor",snapshot.val().attributes.eventBgColor);
-                                
-                                parent.$.cards.eventBgImage=snapshot.val().attributes.eventBgImage;
-                                
-                                parent.showCards();
-                            });
-                            var updates = {};
-                            var userData = {
-                                name: parent.userName,
-                                picture: parent.userPicture
-                            };
-                            var ref = firebase.database().ref(activeEvent + "/users/" + parent.$.cards.userEmail  );
-                            updates["/profile"] = userData;
-                            ref.update(updates);
-                            
-                            firebase.database().ref(activeEvent+'/attributes/activeVotes').on('value', function(snapshot) {
-                                parent.set("activeVotes",snapshot.val());
-                                parent.$.cards.ActiveClassVotes='';
-                                parent.$.cards.activeVotes=snapshot.val();
-                                if(snapshot.val()==false){
-                                    parent.$.cards.ActiveClassVotes='kudo_opacity';
-                                }
-                            });
+                            parent.loadlistEvents();
+                            parent.loadEvent('PE_PI_INI');
                         //});
                     }
                 });
                 
+            },
+            loadlistEvents:function(){
+                firebase.database().ref("listEvents").once("value").then(function(snapshot) {
+                    //var activeEvent = 'events/' + snapshot.val(); //
+                    console.log('evento: ' + snapshot.val());
+                });
+            },
+            loadEvent:function(event){
+                var activeEvent = 'events/'+event; //console.log('activo:'+activo);
+                this.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
+                this.$.cards.activeEvent = activeEvent;
+                this.$.stats.activeEvent = activeEvent;
+                this.$.about.activeEvent = activeEvent;
+                this.$.about.getKudos();
+                this.$.about.getMember();
+                var parent=this;
+                firebase.database().ref(activeEvent).once("value").then(function(snapshot) {
+                    parent.set('eventName', snapshot.val().attributes.name); 
+                    parent.set('admin', snapshot.val().attributes.admin); 
+                    if (snapshot.val().attributes.withStars!=null){
+                        parent.$.cards.withStars=snapshot.val().attributes.withStars;
+                        parent.$.stats.withStars=snapshot.val().attributes.withStars;
+                    }
+                    if (snapshot.val().attributes.withKudos!=null){
+                        parent.$.cards.withKudos=snapshot.val().attributes.withKudos;
+                        parent.$.stats.withKudos=snapshot.val().attributes.withKudos;
+                    }
+                    if (snapshot.val().attributes.withFeedback!=null){
+                        parent.$.cards.withFeedback=snapshot.val().attributes.withKudos;
+                        parent.$.stats.withFeedback=snapshot.val().attributes.withKudos;
+                    }
+                    if (snapshot.val().attributes.withExclusiveKudo!=null){
+                        parent.$.cards.withExclusiveKudo=snapshot.val().attributes.withExclusiveKudo;
+                    }
+                    parent.$.cards.numStars=snapshot.val().attributes.numStars;
+                    parent.$.cards.uid=parent.user.uid;
+                    parent.$.cards.getKudos();
+                    parent.$.cards.getBlocks();
+                    
+                    parent.set("eventLogo",snapshot.val().attributes.eventLogo);
+                    parent.set("eventBgColor",snapshot.val().attributes.eventBgColor);
+                    
+                    parent.$.cards.eventBgImage=snapshot.val().attributes.eventBgImage;
+                    
+                    parent.showCards();
+                });
+                var updates = {};
+                var userData = {
+                    name: parent.userName,
+                    picture: parent.userPicture,
+                    uid: parent.user.uid
+                };
+                var ref = firebase.database().ref(activeEvent + "/users/" + parent.$.cards.userEmail);
+                updates["/profile"] = userData;
+                ref.update(updates);
+                
+                firebase.database().ref(activeEvent+'/attributes/activeVotes').on('value', function(snapshot) {
+                    parent.set("activeVotes",snapshot.val());
+                    parent.$.cards.ActiveClassVotes='';
+                    parent.$.cards.activeVotes=snapshot.val();
+                    if(snapshot.val()==false){
+                        parent.$.cards.ActiveClassVotes='kudo_opacity';
+                    }
+                });
             },
             signInWithGoogle:function() {
                 if (!firebase.auth().currentUser) {

@@ -40,12 +40,19 @@
                       </template>
                       <div><a href="[[card.linkValue]]" target="_blank">[[card.linkLabel]]</a></div>
                     </div>
+
+                  </div>
+                </div>
+                <div class="card-actions kudos-button">
+                  <div id="">
                     <div class="div_feedback">
-                      <paper-button class="rate-icon bot" id="{{card.id}}" data='{{card}}' on-click="openBot" style$="display:[[card.withChat]]">
-                        Chatbot<iron-icon icon="communication:live-help" data='{{card}}'></iron-icon>
-                      </paper-button>
+                      <template is="dom-if" if="{{card.withChat}}">
+                        <paper-button class="rate-icon bot" id="bot_{{card.id}}" data='{{card}}' on-click="openBot">
+                          Chatbot<iron-icon icon="communication:live-help" data='{{card}}'></iron-icon>
+                        </paper-button>
+                      </template>
                       <template is="dom-if" if="{{withFeedback}}">
-                        <paper-button class="rate-icon feeback" id="{{card.id}}" data='{{card}}' on-click="openModal">
+                        <paper-button class="rate-icon feeback" id="fb_{{card.id}}" data='{{card}}' on-click="openModal" >
                           Feedback <iron-icon icon="announcement" data='{{card}}'></iron-icon>
                         </paper-button>
                       </template>
@@ -78,14 +85,14 @@
       </paper-card>
     </template>
     <paper-dialog id="feedback" >
-      <h2 id="titleFeedback">Quick feedback for:</h2>
-      <paper-textarea id="txtFeedback" label="Escribe tu feedback..."></paper-textarea>
+      <h3 id="titleFeedback">Quick feedback for:</h3>
+      <paper-textarea id="txtFeedback" label="Write your feedback..."></paper-textarea>
       <div class="buttons">
         <paper-button id="btnFeedback" on-click="sendFeedback" autofocus>Enviar</paper-button>
         <paper-button dialog-dismiss>Cancelar</paper-button>
       </div>
     </paper-dialog>
-    <paper-toast id="toastAlert" text="Gracias por tu feedback"></paper-toast>
+    <paper-toast id="toastAlert" text="Thanks for your feedback"></paper-toast>
   </template>
   <script>
       Polymer({
@@ -104,17 +111,15 @@
           withKudos       : {type:Boolean, value:false, notify:true},
           withFeedback    : {type:Boolean, value:false, notify:true},
           withStars       : {type:Boolean, value:false, notify:true},
-          activeVotes     : {type:Boolean, value:false, notify:true,observer: '_closeVotes'},
+          withExclusiveKudo : {type:Boolean, value:false, notify:true},
+          activeVotes     : {type:Boolean, value:false, notify:true},
           ActiveClassVotes: {type:String, notify:true, notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
+          uid             : {type:String, notify:true}
         },
         unCollapse: function(e) {
           this.$$('#clp_'+e.target.dataset.args).toggle();
-        },
-        _closeVotes: function(value){
-          //this.toggleClass('highlighted', value);
-          console.info(value);
         },
         getKudos:function(){
           var self = this;
@@ -191,12 +196,15 @@
           var card=this.$.btnFeedback.data;
           var msg=this.$.txtFeedback.value;
           if(msg.trim().length==0){this.$.feedback.close();return;}
-          var ref = db.ref(this.activeEvent + "/users/" + this.userEmail + "/feedback");
+          var ref = db.ref(this.activeEvent + "/trackingComments/" + card.id );
           var postData = {
-            message: msg
+            message : msg,
+            user    : this.userName,
+            uid     : this.uid
           };
+          var newPostKey = ref.push().key;
           var updates = {};
-          updates["/"+ card.block + "/" + card.id + "/comment"] = postData;
+          updates["/"+ newPostKey] = postData;
           ref.update(updates);
           this.$.txtFeedback.value="";
           this.$.feedback.close();
@@ -210,10 +218,10 @@
             if(snapshot.val()!=null){
               if(snapshot.val()==true){
                   kudo.classList.add('kudo_enable');
-                  console.info('#id_img_' +idCard +'_' +idKudo);
               }
             }
           });
+          
         },
         getRatingCardUser:function(idBlock,idCard){
           self=this;
@@ -235,21 +243,44 @@
           var idBlock = _card.block;
           var idBtnKudo=this.$$('#id_img_' +idCard +'_' +idKudo);
           
+          var refControl    = firebase.database().ref(this.activeEvent + '/logKudos/');
+          var refKudosUser  = firebase.database().ref(this.activeEvent + '/logKudosUser/'+  idKudo + '/' + this.userEmail);
+          var self=this;
           
-          var refControl = firebase.database().ref(this.activeEvent +'/logKudos/');
-
           if(this.activeVotes==true){
             if(idBtnKudo.classList.toggle('kudo_enable')) {
+              
+              if(this.withExclusiveKudo==true){
+                refKudosUser.once('value').then(function(snapshot) {
+                  var idPreviousCard="";
+                  if(snapshot.val()!=null){
+                    idPreviousCard=snapshot.val();
+                    var idBtnPreviousKudo=self.$$('#id_img_' +idPreviousCard +'_' +idKudo);
+                    idBtnPreviousKudo.classList.add('kudo_disable');
+                    //refKudosUser.set(idCard);
+                  }
+                  refKudosUser.set(idCard);
+                });
+                
+              }
+              
               idBtnKudo.classList.remove("kudo_disable");
               var updates = {};
               var updatesVotersbyKudo ={};
+              
               updates["/" + idCard + "/" + idKudo + "/" + this.userEmail] = true;
               refControl.update(updates);
+
             } else {
+              if(this.withExclusiveKudo==true){
+                refKudosUser.remove();
+              }
               idBtnKudo.classList.add('kudo_disable');
               firebase.database().ref(this.activeEvent +'/logKudos/'+ idCard + "/" + idKudo + "/" + this.userEmail).remove();
             }
           }
+          
+          
         },
         _putStars:function(e) {
           var data = e.model['__data__'];
