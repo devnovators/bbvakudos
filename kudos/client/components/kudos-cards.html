@@ -66,8 +66,6 @@
                         <div id="id_img_{{card.id}}_{{kudo.id}}" on-click="_assess" data='{{card}}' dataKudo='{{kudo.id}}' style$='background-image: url({{kudo.icon}});' class='kudo_base'>&nbsp;</div>  
                         <div class="kudo_title">{{kudo.title}}</div>
                       </div>
-                      
-                      <paper-tooltip for="id_img_{{card.id}}_{{kudo.id}}" position="top" style="max-width:100px;">{{kudo.description}}</paper-tooltip>
                     </template>
                   </template>
                 </div>
@@ -99,22 +97,20 @@
           userPicture     : {type:String, notify:true},
           error           : {type:Object, value:null, notify:true },
           cards           : {type:Array, notify:true},
+          tmpCards           : {type:Array, notify:true},
           blocks          : {type:Array, notify:true},
           kudos           : {type:Array, notify:true},
           withKudos       : {type:Boolean, value:false, notify:true},
           withFeedback    : {type:Boolean, value:false, notify:true},
           withStars       : {type:Boolean, value:false, notify:true},
-          activeVotes     : {type:Boolean, value:false, notify:true,observer: '_closeVotes'},
+          withExclusiveKudo:{type:Boolean, value:false, notify:true},
+          activeVotes     : {type:Boolean, value:false, notify:true},
           ActiveClassVotes: {type:String, notify:true, notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
         },
         unCollapse: function(e) {
           this.$$('#clp_'+e.target.dataset.args).toggle();
-        },
-        _closeVotes: function(value){
-          //this.toggleClass('highlighted', value);
-          console.info(value);
         },
         getKudos:function(){
           var self = this;
@@ -130,17 +126,21 @@
         getBlocks:function(){
           var ref = firebase.database().ref(this.activeEvent + "/blocks");
           var self = this;
+          self.cards=[];
           ref.once("value").then(function(snapshot) {
             self.blocks = [];
             snapshot.forEach(function(child) {
               var block = child.val();
               block.id  = child.key;
               self.push('blocks', block);
+              for (var card in block.cards) {
+                self.push('cards', card);
+              }
             });
           });
         },
         _getCards:function(block){
-          this.cards = [];
+          this.tmpCards = [];
           self = this;
           for (var card in block.cards) {
             var newCard = { id:card, title:block.cards[card].title, description:block.cards[card].description,
@@ -161,9 +161,9 @@
             // newCard.limitaciones    =block.cards[card].parameters.limitaciones;
             // newCard.marketing       =block.cards[card].parameters.marketing;
             newCard.block           =block.id;
-            self.push('cards', newCard);
+            self.push('tmpCards', newCard);
           }
-          return this.cards;
+          return this.tmpCards;
         },
         openBot:function(e){
           var btnCard = Polymer.dom(e).localTarget;
@@ -204,16 +204,28 @@
         },    
         getKudosUser:function(idBlock,idCard,idKudo){
           self=this;
-          var ref = firebase.database().ref(this.activeEvent + "/logKudos/" + idCard + "/" + idKudo +"/" + this.userEmail);
-          ref.once('value').then(function(snapshot) {
-            var kudo=self.$$('#id_img_' +idCard +'_' +idKudo);
-            if(snapshot.val()!=null){
-              if(snapshot.val()==true){
+          var ref;
+          if(this.withExclusiveKudo){
+            ref = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + idKudo +"/" + this.userEmail);
+            ref.once('value').then(function(snapshot) {
+              var kudo=self.$$('#id_img_' +idCard +'_' +idKudo);
+              if(snapshot.val()!=null){
+                if(idCard==snapshot.val()){
                   kudo.classList.add('kudo_enable');
+                }
               }
-            }
-          });
-          
+            });
+          }else{
+            ref = firebase.database().ref(this.activeEvent + "/logKudos/" + idCard + "/" + idKudo +"/" + this.userEmail);
+            ref.once('value').then(function(snapshot) {
+              var kudo=self.$$('#id_img_' +idCard +'_' +idKudo);
+              if(snapshot.val()!=null){
+                if(snapshot.val()==true){
+                    kudo.classList.add('kudo_enable');
+                }
+              }
+            });
+          }
         },
         getRatingCardUser:function(idBlock,idCard){
           self=this;
@@ -232,21 +244,32 @@
           var _card = kudoSeleccionado.data;
           var idKudo = kudoSeleccionado.datakudo;
           var idCard  = _card.id;
-          var idBlock = _card.block;
           var idBtnKudo=this.$$('#id_img_' +idCard +'_' +idKudo);
+          var kudoEnable=idBtnKudo.classList.contains('kudo_enable');
           
-          var refControl = firebase.database().ref(this.activeEvent +'/logKudos/');
-
-          if(this.activeVotes==true){
-            if(idBtnKudo.classList.toggle('kudo_enable')) {
-              idBtnKudo.classList.remove("kudo_disable");
-              var updates = {};
-              var updatesVotersbyKudo ={};
-              updates["/" + idCard + "/" + idKudo + "/" + this.userEmail] = true;
-              refControl.update(updates);
-            } else {
-              idBtnKudo.classList.add('kudo_disable');
-              firebase.database().ref(this.activeEvent +'/logKudos/'+ idCard + "/" + idKudo + "/" + this.userEmail).remove();
+          var refControl;
+          refControl = firebase.database().ref(this.activeEvent +'/logExclusiveKudos');
+          if(this.activeVotes){
+            if(this.withExclusiveKudo){
+              if(!kudoEnable) {
+                idBtnKudo.classList.add("kudo_enable");
+                
+                var updates = {};
+                updates["/" + idKudo + "/" + this.userEmail] = idCard;
+                refControl.update(updates);
+                
+                for (var _idCard in this.cards) {
+                    if(this.cards[_idCard] != idCard){
+                      var _idBtnKudo=this.$$('#id_img_' +this.cards[_idCard] +'_' +idKudo);
+                      _idBtnKudo.classList.remove('kudo_enable');
+                    }
+                }
+              } else {
+                firebase.database().ref(this.activeEvent +'/logExclusiveKudos/' + idKudo + '/' + this.userEmail).remove();
+                idBtnKudo.classList.remove("kudo_enable");
+              }
+            }else{
+              console.info('MODO NO EXCLUSIVO - en construcción');
             }
           }
         },
