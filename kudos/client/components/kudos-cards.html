@@ -41,7 +41,7 @@
                       <div><a href="[[card.linkValue]]" target="_blank">[[card.linkLabel]]</a></div>
                     </div>
                     <div class="div_feedback">
-                      <paper-button class="rate-icon bot" id="{{card.id}}" data='{{card}}' on-click="openBot" style$="display:[[card.withChat]]">
+                      <paper-button class="rate-icon bot" id="{{card.id}}" data='{{card}}' on-click="openBot" style$="display:{{verifyDisplay(card.withChat)}}">
                         Chatbot<iron-icon icon="communication:live-help" data='{{card}}'></iron-icon>
                       </paper-button>
                       <template is="dom-if" if="{{withFeedback}}">
@@ -108,6 +108,10 @@
           ActiveClassVotes: {type:String, value:true, notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
+        },
+        verifyDisplay:function(flag){
+          if(flag) return 'inline-block';
+          return 'none';
         },
         unCollapse: function(e) {
           this.$$('#clp_'+e.target.dataset.args).toggle();
