@@ -58,11 +58,6 @@
                   </div>
                   <div class="display_inline" style="vertical-align:middle;width:55%;text-align: left;padding-left:5px;"> 
                     {{sortCard.title}}<br>
-                    <template is="dom-if" if="{{sortCard.withFeedback}}">
-                      <paper-button class="rate-icon feeback" id="star_{{sortCard.id}}" data='{{sortCard}}' on-click="getComments">
-                        Ver comentarios <iron-icon icon="announcement" data='{{sortCard}}'></iron-icon>
-                      </paper-button>
-                    </template>
                   </div>
                 </div>
               </div>
@@ -85,7 +80,7 @@
     <div class="resultFeedback">
       <h3>Ranking por Votación</h3>
       <span id="numUsers">(Número de usuarios: {{numUsers}})</span>
-      <template is="dom-repeat" items="{{users}}" as="user">
+      <template is="dom-repeat" items="[[users]]" as="user" id="rankingComments">
         <div>
           <div class="personItem" tabindex$="[[tabIndex]]">
             <iron-image class="avatar" sizing="contain" src="[[user.picture]]"></iron-image>
@@ -93,13 +88,7 @@
               <div class="primary">[[user.name]]</div>
               <address>
                 <template is="dom-if" if="{{withFeedback}}">
-                  <div class="userSection">Feedbacks: [[user.numFeedback]]</div>
-                </template>
-                <template is="dom-if" if="{{withKudos}}">
-                  <div class="userSection">Kudos: [[user.numKudos]]</div>
-                </template>
-                <template is="dom-if" if="{{withStars}}">
-                  <div class="userSection">Stars: [[user.numStars]]</div>
+                  <div class="userSection">Feedbacks: [[user.numFeedBack]]</div>
                 </template>
               </address>
             </div>
@@ -108,17 +97,6 @@
       </template>
     </div>
   </iron-pages>
-    <paper-dialog id="commentDialog" style="background: #f2f3f5;margin: 6px;">
-      <div id="commentDialogTitle" class="display_inline" style="font-weight: bold;">Comments</div>
-      <paper-dialog-scrollable>
-        <ul>
-          <div id="commentsList" style="text-align: left;"></div>  
-        </ul>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-confirm autofocus>OK</paper-button>
-      </div>
-    </paper-dialog>
 </template>
 <script>
  Polymer({
@@ -128,7 +106,6 @@
       cards         : { type: Array, notify:true },
       kudos         : { type: Array, notify:true },
       users         : { type: Array, notify:true },
-      listUsers     : { type: Object, notify:true },
       numUsers      : { type: String, notify:true },
       selected      : { value: 0 },
       display       : { value: "block" },
@@ -193,86 +170,41 @@
         );
       };
     },
-    getComments:function(e){
-      var cardChosen = Polymer.dom(e).localTarget;
-      var lista="";
-      if(cardChosen.data){
-        lista="";
-        var comentarios=cardChosen.data.comments;
-        for (var comment in comentarios){
-          lista=lista+"<div style='padding:5px;background:#fff;border-radius: 18px'><b style='color:#365899'>" + comment + "</b>  " + comentarios[comment].message +"</div><br>";
-        }
-      }
-      this.$.commentDialogTitle.innerHTML=cardChosen.data.title;
-      this.$.commentsList.innerHTML=lista;
-      this.$.commentDialog.open();
-    },
     getRanking:function() {
       var self=this;
-      
       firebase.database().ref(this.activeEvent +'/users').once('value',function(snapshot) {
         var users = snapshot.val();
-        self.set('listUsers',users);
         var numUsers=0;
         self.users=[];
         for (var user in users) {
           var _user={};
+          var numFeedBack=0;
           numUsers++;
-          _user.name=users[user].profile.name;
-          _user.picture=users[user].profile.picture;
-          var numKudos=0;
-          var numFeedback=0;
-          var numStars=0;
-          for (var block in users[user].feedback) {
-            for(var card in users[user].feedback[block]){
-              var vote = users[user].feedback[block][card];
-              for (var prop in vote) {
-                if (prop == 'comment') {
-                  for (var commentProps in users[user].feedback[block][card][prop]) {
-                    if (commentProps == 'message') {
-                      var message = users[user].feedback[block][card][prop][commentProps];
-                      if (message.toString().trim().length>1) {
-                        numFeedback++;
-                      }
-                    }
-                  }
-                } else if (prop == 'kudos') {
-                  var kudos = users[user].feedback[block][card]['kudos'];
-                  for (var kudo in kudos){
-                    if (kudos[kudo]){ numKudos++; }
-                  }
-                }else if(prop == 'rating'){
-                  var rating =0;
-                  if (users[user].feedback[block][card]['rating'] == null){ rating = 0;
-                  } else { rating = users[user].feedback[block][card]['rating']; }
-                  numStars = numStars + rating;
-                }
-              }
+          _user.name        = users[user].profile.name;
+          _user.picture     = users[user].profile.picture;
+          _user.numFeedBack = 0;
+          console.info(users[user].profile.uid);
+          firebase.database().ref(self.activeEvent +'/trackingUserComments/'+users[user].profile.uid).once('value',function(snapshot) {
+            console.info(users[user].profile.uid);
+            var posts=snapshot.val();
+            if (posts){
+                numFeedBack=Object.keys(posts).length;
+                console.info(users[user].profile.uid+ ' - ' + numFeedBack);
+                _user.numFeedBack=numFeedBack;
             }
-          }
-          _user.numFeedback=numFeedback;
+          });
           self.push('users',_user);
+          self.users.sort(function(a,b) {
+            return (a.numFeedBack > b.numFeedBack) ? -1 : ((b.numFeedBack > a.numFeedBack) ? 1 : 0);} );
+          self.$$('#rankingComments').render();
         }
         self.numUsers=numUsers;
-        self.users.sort(function(a,b) {
-           return (a.numFeedback > b.numFeedback) ? -1 : ((b.numFeedback > a.numFeedback) ? 1 : 0);} );
       });
-
-    },
-    reloadFeedback:function(e) {
-      this.renderAll();
-    },
-    renderAll:function(){
-      // this.$.listRating.render();
-      // this.$.listCustomer.render();
-      // this.$.listThink.render();
-      // this.$.listTeam.render();
     },
     unCollapse: function(e) {
       if(e.target.dataset.selector!='undefined'){
         this.$$(e.target.dataset.selector).toggle();  
       }
-      this.renderAll();
     }
   });
 </script>

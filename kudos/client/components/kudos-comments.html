@@ -9,8 +9,8 @@
         </div>
         <div style="height: 85vh;">
           <div style="overflow-y:auto;height:70vh;" id="chat">
-            <template is="dom-repeat" items="{{mensajes}}">
-                <div class="bot_label">[[item.from]] dice: [[item.message]]</div>
+            <template is="dom-repeat" items="{{messages}}">
+                <div class="div-author-comment"><img  class="avatar" src="[[item.authorPhoto]]"><b class="text-author-comment">[[item.authorName]]</b>: [[item.message]]</div>
             </template>
           </div>
           <div id="wait" style="font-size:18px;display: none;">...</div>
@@ -34,22 +34,23 @@
             userName        : {type:String, notify:true},
             userEmail       : {type:String, notify:true},
             userUID         : {type:String, notify:true},
-            mensajes        : {type:Array,  notify:true},
+            messages        : {type:Array,  notify:true},
             currentCard     : {type:Object, notify:true},
         },
-        apiResponseHandler: function(data) {
-
+        loadComments: function() {
           var thisChat=this;
-          setTimeout(function(){
-            thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
-           }, 100);
-          setTimeout(function(){
+          var ref = firebase.database().ref(this.activeEvent + "/trackingComments/" + this.currentCard.id);
+          thisChat.cards=[];
+          ref.once("value").then(function(snapshot) {
+            thisChat.messages = [];
+            snapshot.forEach(function(child) {
+              var detail=child.val();
+              var message={ authorPhoto: detail.authorPic,authorName: detail.author, message: detail.message};
+              thisChat.push('messages',message);
+            });
             thisChat.$.wait.style.display = "none";
-            thisChat.push('mensajes', newMessage);
-           }, 800);
-          setTimeout(function(){
             thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
-           }, 1000);
+          });  
         },
         initChat:function(btn){
           var btnCard = btn;
@@ -58,12 +59,13 @@
           this.$.txtMessage.value="";
           this.$.btnSendMessage.data=card.id;
           this.$.titleBot.innerHTML=card.title;
+          this.loadComments();
         },
         sendMessage:function(){
           if(this.$.txtMessage.value.length!=0){
             this.$.wait.style.display = "block";
             var ref = firebase.database().ref(this.activeEvent);
-            var newPostKey = ref.child('trackingComments').child(currentCard.id).push().key;
+            var newPostKey = ref.child('trackingComments').child(this.currentCard.id).push().key;
             var postData = {
                 author: this.userName,
                 uid: this.userUID,
@@ -71,14 +73,15 @@
                 authorPic: this.userPicture
             };
             var updates = {};
-            updates["/trackingComments/" + currentCard.id + "/" + newPostKey] = postData;
-            updates['/trackingUserComments/' + uid + '/' + newPostKey] = postData;
+            updates["/trackingComments/" + this.currentCard.id + "/" + newPostKey] = postData;
+            updates['/trackingUserComments/' + this.userUID + '/' + newPostKey] =  this.$.txtMessage.value;
             ref.update(updates);
             this.$.txtMessage.value = "";
+            this.loadComments();
           }
         },
         closeChat:function(){
-          this.set('mensajes', []);
+          this.set('messages', []);
         }
       });
     </script>
