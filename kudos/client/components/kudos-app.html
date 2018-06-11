@@ -42,6 +42,7 @@
 <link rel="import" href="kudos-about.html">
 <link rel="import" href="kudos-positions-table.html">
 <link rel="import" href="kudos-chatbot.html">
+<link rel="import" href="kudos-comments.html">
 <dom-module id="kudos-app">
     <template>
         <style is="custom-style">
@@ -81,7 +82,7 @@
             <app-header-layout >
                 <app-header fixed style$="background:[[eventBgColor]]">
                     <app-toolbar>
-                        <paper-icon-button icon="arrow-back" id="mBack" on-tap="closeChatbot" style="display:none"></paper-icon-button>
+                        <paper-icon-button icon="arrow-back" id="mBack" on-tap="closeChat" style="display:none"></paper-icon-button>
                         <div>
                             <img src="[[eventLogo]]" width="40px" height="40px">
                         </div>
@@ -102,6 +103,7 @@
                 <kudos-stats id="stats" style="display:none"></kudos-stats>
                 <kudos-about id="about" style="display:none"></kudos-about>
                 <kudos-chatbot id="chatbot" class="chatbot" style="display:none"></kudos-chatbot>
+                <kudos-comments id="comments" style="display:none"></kudos-comments>
             </app-header-layout>
         </div>
     </template>
@@ -129,6 +131,7 @@
             },
             ready:function() {
                 this.addEventListener('showChatbot', this.showChatbot);
+                this.addEventListener('showComments', this.showComments);
                 firebase.initializeApp({
                     apiKey: "AIzaSyCQgB2pehO3brhVrS6xhd-DKBx0NWV6CfE",
                     authDomain: "bbva-kudos.firebaseapp.com",
@@ -147,15 +150,21 @@
                         if(account.displayName){
                             parent.$.cards.userFirstName    = account.displayName.split(' ')[0];    
                             parent.$.cards.userName         = account.displayName;
-                            parent.$.chatbot.userFirstName  = account.displayName.split(' ')[0];
+                            parent.$.chatbot.userFirstName  = parent.$.cards.userFirstName;
+                            parent.$.comments.userFirstName = parent.$.chatbot.userFirstName;
+                            parent.$.comments.userName      = parent.$.cards.userName ;
                         }else{
                             parent.$.cards.userFirstName    = account.email;
                             parent.$.cards.userName         = account.email.toString().replace(/[@.]/g,'_');
                             parent.$.chatbot.userFirstName  = account.email;
+                            parent.$.comments.userFirstName = account.email;
+                            parent.$.comments.userName      = parent.$.cards.userName ;
                         }
                         parent.$.chatbot.userEmail      = account.email.toString().replace(/[@.]/g,'_');
                         parent.$.cards.userEmail = account.email.toString().replace(/[@.]/g,'_');
                         parent.$.cards.userPicture = account.photoURL || '../images/avatar_login.png';
+                        parent.$.comments.userPicture = parent.$.cards.userPicture;
+                        parent.$.comments.userUID     = parent.user.uid;
                         
                         parent.set('userName', parent.$.cards.userName);
                         parent.set('userPicture', parent.$.cards.userPicture);
@@ -272,6 +281,7 @@
                     this.$.stats.style.display = "none";
                     this.$.about.style.display = "none";
                     this.$.chatbot.style.display = "none";
+                    this.$.comments.style.display = "none";
                 }
             },
             showStats:function() {
@@ -280,6 +290,7 @@
                     this.$.stats.style.display = "block";
                     this.$.about.style.display = "none";
                     this.$.chatbot.style.display = "none";
+                    this.$.comments.style.display = "none";
                     this.$.stats.getRanking();
                 }
             },
@@ -289,6 +300,7 @@
                     this.$.stats.style.display = "none";
                     this.$.about.style.display = "block";
                     this.$.chatbot.style.display = "none";
+                    this.$.comments.style.display = "none";
                 }
             },
             showChatbot:function(event) {
@@ -297,19 +309,33 @@
                     this.$.cards.style.display = "none";
                     this.$.stats.style.display = "none";
                     this.$.about.style.display = "none";
+                    this.$.comments.style.display = "none";
                     this.$.chatbot.style.display = "block";
                 }
                 this.$.chatbot.initBot(event.detail);
             },
-            closeChatbot:function() {
+            closeChat:function() {
                 if(this.logged){
                     this.$.mBack.style.display = "none";
                     this.$.cards.style.display = "block";
                     this.$.stats.style.display = "none";
                     this.$.about.style.display = "none";
                     this.$.chatbot.style.display = "none";
+                    this.$.comments.style.display = "none";
                 }
                 this.$.chatbot.closeBot();
+                this.$.comments.closeChat();
+            },
+            showComments:function(event) {
+                if(this.logged){
+                    this.$.mBack.style.display = "block";
+                    this.$.cards.style.display = "none";
+                    this.$.stats.style.display = "none";
+                    this.$.about.style.display = "none";
+                    this.$.chatbot.style.display = "none";
+                    this.$.comments.style.display = "block";
+                }
+                this.$.comments.initChat(event.detail);
             },
             signOut:function() {
                 firebase.auth().signOut();

@@ -209,6 +209,7 @@
     },
     getRanking:function() {
       var self=this;
+      
       firebase.database().ref(this.activeEvent +'/users').once('value',function(snapshot) {
         var users = snapshot.val();
         self.set('listUsers',users);
@@ -249,9 +250,7 @@
               }
             }
           }
-          _user.numKudos=numKudos;
           _user.numFeedback=numFeedback;
-          _user.numStars=numStars;
           self.push('users',_user);
         }
         self.numUsers=numUsers;

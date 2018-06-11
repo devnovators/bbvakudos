@@ -1,0 +1,85 @@
+<dom-module id="kudos-comments">
+<link rel="import" href="../css/kudo-style.html">
+    <template>
+        <style include="cards"></style>
+        <div>
+          <div style="display:inline-block;width:90% !important;align:right;">
+            <b><span id="titleBot"></span></b>
+          </div>
+        </div>
+        <div style="height: 85vh;">
+          <div style="overflow-y:auto;height:70vh;" id="chat">
+            <template is="dom-repeat" items="{{mensajes}}">
+                <div class="bot_label">[[item.from]] dice: [[item.message]]</div>
+            </template>
+          </div>
+          <div id="wait" style="font-size:18px;display: none;">...</div>
+          <div style="width:100%;margin:0px;padding:0px;">
+            <div style="display:inline-block;width:80%;">
+              <paper-textarea id="txtMessage" label="[[userFirstName]], ingresa tu feedback..."></paper-textarea>
+            </div>
+            <div style="display:inline-block;width:15%;">
+              <paper-icon-button icon="icons:send" id="btnSendMessage" on-tap="sendMessage" autofocus></paper-icon-button>
+            </div>
+          </div>
+        </div>
+    </template>
+    <script>
+      Polymer({
+        is: 'kudos-comments',
+        properties:{
+            activeEvent     : {type:String, notify:true},
+            userFirstName   : {type:String, notify:true},
+            userPicture     : {type:String, notify:true},
+            userName        : {type:String, notify:true},
+            userEmail       : {type:String, notify:true},
+            userUID         : {type:String, notify:true},
+            mensajes        : {type:Array,  notify:true},
+            currentCard     : {type:Object, notify:true},
+        },
+        apiResponseHandler: function(data) {
+
+          var thisChat=this;
+          setTimeout(function(){
+            thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
+           }, 100);
+          setTimeout(function(){
+            thisChat.$.wait.style.display = "none";
+            thisChat.push('mensajes', newMessage);
+           }, 800);
+          setTimeout(function(){
+            thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
+           }, 1000);
+        },
+        initChat:function(btn){
+          var btnCard = btn;
+          var card = btnCard.data; this.currentCard = card;
+          var self=this;
+          this.$.txtMessage.value="";
+          this.$.btnSendMessage.data=card.id;
+          this.$.titleBot.innerHTML=card.title;
+        },
+        sendMessage:function(){
+          if(this.$.txtMessage.value.length!=0){
+            this.$.wait.style.display = "block";
+            var ref = firebase.database().ref(this.activeEvent);
+            var newPostKey = ref.child('trackingComments').child(currentCard.id).push().key;
+            var postData = {
+                author: this.userName,
+                uid: this.userUID,
+                message: this.$.txtMessage.value,
+                authorPic: this.userPicture
+            };
+            var updates = {};
+            updates["/trackingComments/" + currentCard.id + "/" + newPostKey] = postData;
+            updates['/trackingUserComments/' + uid + '/' + newPostKey] = postData;
+            ref.update(updates);
+            this.$.txtMessage.value = "";
+          }
+        },
+        closeChat:function(){
+          this.set('mensajes', []);
+        }
+      });
+    </script>
+</dom-module>

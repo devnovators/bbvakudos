@@ -45,7 +45,7 @@
                         Chatbot<iron-icon icon="communication:live-help" data='{{card}}'></iron-icon>
                       </paper-button>
                       <template is="dom-if" if="{{withFeedback}}">
-                        <paper-button class="rate-icon feeback" id="{{card.id}}" data='{{card}}' on-click="openModal">
+                        <paper-button class="rate-icon feeback" id="{{card.id}}" data='{{card}}' on-click="openComments">
                           Feedback <iron-icon icon="announcement" data='{{card}}'></iron-icon>
                         </paper-button>
                       </template>
@@ -176,38 +176,9 @@
           var btnCard = Polymer.dom(e).localTarget;
           this.fire('showChatbot', btnCard);
         },
-        openModal:function(e){
+        openComments:function(e){
           var btnCard = Polymer.dom(e).localTarget;
-          var card = btnCard.data;
-          var self=this;
-          this.$.txtFeedback.value="";
-          this.$.btnFeedback.data=card;
-          this.$.titleFeedback.innerHTML="Quick feedback for:<br>" + card.title;
-          this.$.feedback.open();
-          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail+ "/feedback/"+ card.block +"/" + card.id + "/comment");
-          ref.once('value').then(function(snapshot) {
-            var msg="";
-            if(snapshot.val()!=null){
-              msg=snapshot.val().message;
-            }
-            self.$.txtFeedback.value=msg;
-          });
-        },
-        sendFeedback:function(){
-          var db = firebase.database();
-          var card=this.$.btnFeedback.data;
-          var msg=this.$.txtFeedback.value;
-          if(msg.trim().length==0){this.$.feedback.close();return;}
-          var ref = db.ref(this.activeEvent + "/users/" + this.userEmail + "/feedback");
-          var postData = {
-            message: msg
-          };
-          var updates = {};
-          updates["/"+ card.block + "/" + card.id + "/comment"] = postData;
-          ref.update(updates);
-          this.$.txtFeedback.value="";
-          this.$.feedback.close();
-          this.$.toastAlert.open();
+          this.fire('showComments', btnCard);
         },    
         getKudosUser:function(idBlock,idCard,idKudo){
           self=this;
