@@ -97,7 +97,7 @@
           userPicture     : {type:String, notify:true},
           error           : {type:Object, value:null, notify:true },
           cards           : {type:Array, notify:true},
-          tmpCards           : {type:Array, notify:true},
+          tmpCards        : {type:Array, notify:true},
           blocks          : {type:Array, notify:true},
           kudos           : {type:Array, notify:true},
           withKudos       : {type:Boolean, value:false, notify:true},
@@ -105,7 +105,7 @@
           withStars       : {type:Boolean, value:false, notify:true},
           withExclusiveKudo:{type:Boolean, value:false, notify:true},
           activeVotes     : {type:Boolean, value:false, notify:true},
-          ActiveClassVotes: {type:String, notify:true, notify:true},
+          ActiveClassVotes: {type:String, value:true, notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
         },
@@ -133,7 +133,10 @@
               var block = child.val();
               block.id  = child.key;
               self.push('blocks', block);
-              for (var card in block.cards) {
+              for (var idCard in block.cards) {
+                var card=block.cards[idCard];
+                card.idCard     = idCard;
+                card.titleBlock = block.title;
                 self.push('cards', card);
               }
             });
@@ -227,6 +230,50 @@
             });
           }
         },
+        _assess:function(e) {
+          var kudoSeleccionado = Polymer.dom(e).localTarget;
+          var _card = kudoSeleccionado.data;
+          var idKudo = kudoSeleccionado.datakudo;
+          var idCard  = _card.id;
+          var idBtnKudo=this.$$('#id_img_' +idCard +'_' +idKudo);
+          var kudoEnable=idBtnKudo.classList.contains('kudo_enable');
+          
+          var refControl;
+          var updates = {};
+          if(this.activeVotes){
+            if(this.withExclusiveKudo){
+              refControl = firebase.database().ref(this.activeEvent +'/logExclusiveKudos');
+              if(!kudoEnable) {
+                idBtnKudo.classList.add("kudo_enable");
+                
+                updates["/" + idKudo + "/" + this.userEmail] = idCard;
+                refControl.update(updates);
+                
+                for (var _idCard in this.cards) {
+                    if(this.cards[_idCard].idCard != idCard){
+                      var _idBtnKudo=this.$$('#id_img_' +this.cards[_idCard].idCard +'_' +idKudo);
+                      _idBtnKudo.classList.remove('kudo_enable');
+                    }
+                }
+              } else {
+                firebase.database().ref(this.activeEvent +'/logExclusiveKudos/' + idKudo + '/' + this.userEmail).remove();
+                idBtnKudo.classList.remove("kudo_enable");
+              }
+            }else{
+              refControl = firebase.database().ref(this.activeEvent +'/logKudos');
+              if(!kudoEnable) {
+                idBtnKudo.classList.add("kudo_enable");
+                
+                updates = {};
+                updates["/" + idCard + "/" + idKudo + "/" + this.userEmail] = true;
+                refControl.update(updates);
+              } else {
+                firebase.database().ref(this.activeEvent +'/logKudos/' + idCard +'/' + idKudo + '/' + this.userEmail).remove();
+                idBtnKudo.classList.remove("kudo_enable");
+              }
+            }
+          }
+        },
         getRatingCardUser:function(idBlock,idCard){
           self=this;
           var ref = firebase.database().ref(this.activeEvent + "/logStars/" + idCard + "/" + this.userEmail);
@@ -239,42 +286,6 @@
             self.$$('#star_' +idCard).rate=numStars;
           });
         },
-        _assess:function(e) {
-          var kudoSeleccionado = Polymer.dom(e).localTarget;
-          var _card = kudoSeleccionado.data;
-          var idKudo = kudoSeleccionado.datakudo;
-          var idCard  = _card.id;
-          var idBtnKudo=this.$$('#id_img_' +idCard +'_' +idKudo);
-          var kudoEnable=idBtnKudo.classList.contains('kudo_enable');
-          
-          var refControl;
-          refControl = firebase.database().ref(this.activeEvent +'/logExclusiveKudos');
-          if(this.activeVotes){
-            if(this.withExclusiveKudo){
-              if(!kudoEnable) {
-                idBtnKudo.classList.add("kudo_enable");
-                
-                var updates = {};
-                updates["/" + idKudo + "/" + this.userEmail] = idCard;
-                refControl.update(updates);
-                
-                for (var _idCard in this.cards) {
-                    if(this.cards[_idCard] != idCard){
-                      var _idBtnKudo=this.$$('#id_img_' +this.cards[_idCard] +'_' +idKudo);
-                      _idBtnKudo.classList.remove('kudo_enable');
-                    }
-                }
-              } else {
-                firebase.database().ref(this.activeEvent +'/logExclusiveKudos/' + idKudo + '/' + this.userEmail).remove();
-                idBtnKudo.classList.remove("kudo_enable");
-              }
-            }else{
-              console.info('MODO NO EXCLUSIVO - en construcción');
-            }
-          }
-        },
-        
-        
         _putStars:function(e) {
           var data = e.model['__data__'];
           var idCard = data.card.id;

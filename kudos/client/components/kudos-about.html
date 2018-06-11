@@ -2,26 +2,21 @@
 <link rel="import" href="../css/kudo-style.html">
 <template id="tmpkudoAbout">
     <style include="about-estilo"></style>
-    <style include="kudos"></style>
+    <style include="cards"></style>
     <div class="card">
         <h1>{{titulo}}</h1>
         <p>{{titulo_des}}</p>
         <h1>{{sub_titulo}}</h1>
         <p>{{contenido_sub_titulo}}</p>
-        <paper-button id="kudoejemplo" class="kudo" toggles raised>
-         <iron-icon icon="{{kudo.icon}}"></iron-icon> {{kudo.title}}
-        </paper-button><span>{{sub_contenido}}</span>
+
         <h1>{{titulo_secundario}}</h1>
         <template id="kudos-disponibles" is="dom-repeat" items="{{kudos}}" as="kudo">
-            <paper-button id="{{kudo.id}}" class="kudo" on-click="describirKudo" toggles raised>
-              <iron-icon  icon="{{kudo.icon}}"></iron-icon> {{kudo.title}}
-            </paper-button>
+          <div style="display:inline-block;">
+            <div id="{{kudo.id}}" on-click="describirKudo" data='{{card}}' dataKudo='{{kudo.id}}' style$='background-image: url({{kudo.icon}});' class='kudo_base'>&nbsp;</div>  
+            <div class="kudo_title">{{kudo.title}}</div>
+          </div>
         </template>
-        <template is="dom-if" if="{{descripcionVisible}}">
-         <div style="padding-left: 7px;">
-           <span style="color: #0079C1; font-weight: bold;">Se agradece al equipo por:<br>{{descripcion}}</span>
-         </div>
-        </template>
+
         <br>
         <h1>¿Y los culpables? ¡Que pasen los <b>Devnovators</b>!</h1>
         <div>
@@ -35,7 +30,7 @@
             </template>
         </div>
         <div><img src="../images/devnovators.jpg" class="photo"></div>
-        <div><span style="color:#0072BB; font-size:1em; font-weight:500;">Devnovators - Perú 2017</span></div>
+        <div><span style="color:#0072BB; font-size:1em; font-weight:500;">Devnovators - Perú 2018</span></div>
     </div>
 </template>
 
@@ -94,20 +89,10 @@
           type:Object,
           notify: true,
           value: function() { return {}; }
-      },
-      member: {
-          type:Object,
-          notify: true,
-          value: function() { return {}; }
-      },
-    },
-    ready: function(){},
-    attached: function(){
-        // this.getKudos();
-        // this.getMember();
+      }
     },
     verifyPic:function(picture){
-      if(picture!=null)return true
+      if(picture!=null) return true;
       return false;
     },
     getKudos: function(){
@@ -140,17 +125,11 @@
         var kudoSeleccionado = event.model['__data__'];
         var idKudo = kudoSeleccionado.kudo.id;
         var idBtnKudo = this.$$('#'+idKudo);
-        if(idBtnKudo != this.botonSeleccionado){
-          if(this.botonSeleccionado != null) {
-            this.botonSeleccionado.active = false;
-          }
-        } else {
-          this.botonSeleccionado = {};
-        }
-        this.botonSeleccionado = idBtnKudo;
-        this.descripcionVisible = idBtnKudo.active;
-        if(idBtnKudo.active){
-          this.descripcion = kudoSeleccionado.kudo.description;
+        var kudoEnable=idBtnKudo.classList.contains('kudo_enable');
+        if(!kudoEnable) {
+          idBtnKudo.classList.add("kudo_enable");
+        }else{
+          idBtnKudo.classList.remove("kudo_enable");
         }
     }
   });

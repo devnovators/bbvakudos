@@ -40,6 +40,7 @@
 <link rel="import" href="kudos-cards.html">
 <link rel="import" href="kudos-stats.html">
 <link rel="import" href="kudos-about.html">
+<link rel="import" href="kudos-positions-table.html">
 <link rel="import" href="kudos-chatbot.html">
 <dom-module id="kudos-app">
     <template>
@@ -139,9 +140,7 @@
                 var parent = this;
                 firebase.auth().onAuthStateChanged(function(account) {
                     if (account) {
-                        console.info(account);
-                        
-                        console.log("user id: " + firebase.auth().currentUser.uid);
+                        //console.log("user id: " + firebase.auth().currentUser.uid);
                         
                         parent.set('user', account);
                         parent.set('userEmail', account.email);
@@ -164,7 +163,7 @@
                         //firebase.database().ref("activeEvent").once("value").then(function(snapshot) {
                             //var activeEvent = 'events/' + snapshot.val(); //console.log('activo:'+activo);
                             parent.loadlistEvents();
-                            parent.loadEvent('PE_PI_INI');
+                            parent.loadEvent('ES_PI1_DEMO');
                         //});
                     }
                 });
@@ -173,7 +172,7 @@
             loadlistEvents:function(){
                 firebase.database().ref("listEvents").once("value").then(function(snapshot) {
                     //var activeEvent = 'events/' + snapshot.val(); //
-                    console.log('evento: ' + snapshot.val());
+                    //console.log('evento: ' + snapshot.val());
                 });
             },
             loadEvent:function(event){
@@ -186,7 +185,7 @@
                 this.$.about.getMember();
                 var parent=this;
                 firebase.database().ref(activeEvent).once("value").then(function(snapshot) {
-                    parent.set('eventName', snapshot.val().attributes.name); 
+                    parent.set('eventName', snapshot.val().attributes.title); 
                     parent.set('admin', snapshot.val().attributes.admin); 
                     if (snapshot.val().attributes.withStars!=null){
                         parent.$.cards.withStars=snapshot.val().attributes.withStars;
@@ -202,12 +201,15 @@
                     }
                     if (snapshot.val().attributes.withExclusiveKudo!=null){
                         parent.$.cards.withExclusiveKudo=snapshot.val().attributes.withExclusiveKudo;
+                        parent.$.stats.withExclusiveKudo=snapshot.val().attributes.withExclusiveKudo;
                     }
                     parent.$.cards.numStars=snapshot.val().attributes.numStars;
                     parent.$.cards.uid=parent.user.uid;
                     parent.$.cards.getKudos();
                     parent.$.cards.getBlocks();
-                    
+                    parent.$.stats.getKudos();
+                    parent.$.stats.getBlocks();
+
                     parent.set("eventLogo",snapshot.val().attributes.eventLogo);
                     parent.set("eventBgColor",snapshot.val().attributes.eventBgColor);
                     
@@ -253,6 +255,17 @@
                     //firebase.auth().signOut();
                 }
             },
+            getKudos:function(){
+                var self = this;
+                firebase.database().ref(this.activeEvent + '/kudos').once('value').then(function(snapshot) {
+                    self.kudos = [];
+                    snapshot.forEach(function(child) {
+                        var kudo = child.val();
+                        kudo.id=child.key;
+                        self.push('kudos', kudo);
+                    });
+                });
+            },
             showCards:function() {
                 if(this.logged){
                     this.$.cards.style.display = "block";
@@ -267,7 +280,6 @@
                     this.$.stats.style.display = "block";
                     this.$.about.style.display = "none";
                     this.$.chatbot.style.display = "none";
-                    this.$.stats.getCards();
                     this.$.stats.getRanking();
                 }
             },
