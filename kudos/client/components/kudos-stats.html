@@ -166,7 +166,6 @@
     },
     closeKudoStats:function(){
       for(var kudo of this.kudos){
-        console.info("cerrando tabs: " + kudo.id);
         this.$$('#stat_'+kudo.id).closeTable();
       }
     },
@@ -181,7 +180,6 @@
               self.users.find(function(currentValue, index, arr) {
               if(currentValue.uid === snapshot.key){
                 currentValue.numFeedBack=numFeedBack;
-                console.log(currentValue.name + " ==> " + currentValue.numFeedBack);
                 self.users.sort(function(a,b) {
                   return (a.numFeedBack > b.numFeedBack) ? -1 : ((b.numFeedBack > a.numFeedBack) ? 1 : 0);} );
                 self.$$('#rankingComments').render();
