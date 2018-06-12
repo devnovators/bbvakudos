@@ -4,11 +4,11 @@
  <style include="cards"></style>
  <style include="stats"></style>
   <div class="card">
-    <h3>Resultados del evento</h3>
+    <h3>Results of the event</h3>
   </div>
   <paper-tabs selected="{{selected}}">
-    <paper-tab>Valoraciones</paper-tab>
-    <paper-tab>Agradecimientos</paper-tab>
+    <paper-tab>Assessment</paper-tab>
+    <paper-tab>Gratefulness</paper-tab>
   </paper-tabs>
 
   <iron-pages selected="{{selected}}">
@@ -78,8 +78,8 @@
     </div>
 
     <div class="resultFeedback">
-      <h3>Ranking por Votación</h3>
-      <span id="numUsers">(Número de usuarios: {{numUsers}})</span>
+      <h3>Ranking for users</h3>
+      <span id="numUsers">(Number of users: {{numUsers}})</span>
       <template is="dom-repeat" items="[[users]]" as="user" id="rankingComments">
         <div>
           <div class="personItem" tabindex$="[[tabIndex]]">

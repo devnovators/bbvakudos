@@ -7,7 +7,7 @@
     <!-- Bienvenida -->
     <div style="display:table">
       <img id="imgProfile" class="avatar" src="{{userPicture}}">
-      <div style="display:table-cell;vertical-align:middle"> ¡Bienvenido <span style="color:#448081;">{{userFirstName}}</span>!</div>
+      <div style="display:table-cell;vertical-align:middle"> ¡Welcome <span style="color:#448081;">{{userFirstName}}</span>!</div>
     </div>
     <!-- Lista de Bloques -->
     <template id="arrBlocks" is="dom-repeat" items="{{blocks}}" as="block">
@@ -28,7 +28,7 @@
                   </div>
                   <div class="rate-name">
                     <div class="div_middle">
-                      <div><b>Descripción:</b> {{card.description}}</div>
+                      <div><b>Description:</b> {{card.description}}</div>
                       <template is="dom-if" if="{{card.sdacode}}">
                         <div><b>SDACODE:</b> {{card.sdacode}}</div>
                       </template>
