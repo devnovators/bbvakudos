@@ -169,6 +169,12 @@
         );
       };
     },
+    closeKudoStats:function(){
+      for(var kudo of this.kudos){
+        console.info("cerrando tabs: " + kudo.id);
+        this.$$('#stat_'+kudo.id).closeTable();
+      }
+    },
     getRanking:function(){
       var self=this;
       for(var user of this.users){
@@ -193,6 +199,7 @@
     },
     getUsers:function() {
       var self=this;
+      this.closeKudoStats();
       firebase.database().ref(this.activeEvent +'/users').once('value',function(snapshot) {
         var users = snapshot.val();
         var numUsers=0;
@@ -206,7 +213,6 @@
           _user.picture     = users[user].profile.picture;
           _user.numFeedBack = 0;
           self.push('users',_user);
-          //console.info(users[user].profile.uid);
         }
         self.numUsers=numUsers;
       });
