@@ -8,7 +8,7 @@
   </div>
   <paper-tabs selected="{{selected}}">
     <paper-tab>Assessment</paper-tab>
-    <paper-tab>Gratefulness</paper-tab>
+    <paper-tab on-click="getRanking">Gratefulness</paper-tab>
   </paper-tabs>
 
   <iron-pages selected="{{selected}}">
@@ -73,22 +73,20 @@
         </template>
       </template>
       
-
-      
     </div>
 
     <div class="resultFeedback">
-      <h3>Ranking for users</h3>
+      <h3>Ranking of users</h3>
       <span id="numUsers">(Number of users: {{numUsers}})</span>
       <template is="dom-repeat" items="[[users]]" as="user" id="rankingComments">
         <div>
           <div class="personItem" tabindex$="[[tabIndex]]">
             <iron-image class="avatar" sizing="contain" src="[[user.picture]]"></iron-image>
             <div class="pad">
-              <div class="primary">[[user.name]]</div>
+              <div><b style="font-size: 12px;">[[user.name]]</b></div>
               <address>
                 <template is="dom-if" if="{{withFeedback}}">
-                  <div class="userSection">Feedbacks: [[user.numFeedBack]]</div>
+                  <div class="inline-block">Feedbacks: [[user.numFeedBack]]</div>
                 </template>
               </address>
             </div>
@@ -110,6 +108,7 @@
       selected      : { value: 0 },
       display       : { value: "block" },
       sortedRating  : { type: Array, notify:true },
+      
       
       withExclusiveKudo:{type:Boolean, value:false, notify:true},
       withKudos     : { type:Boolean, value:false, notify:true},
@@ -170,7 +169,29 @@
         );
       };
     },
-    getRanking:function() {
+    getRanking:function(){
+      var self=this;
+      for(var user of this.users){
+        var numFeedBack=0;
+        firebase.database().ref(self.activeEvent +'/trackingUserComments/'+user.uid).once('value',function(snapshot) {
+          var posts=snapshot.val();
+          if (posts){
+              numFeedBack=Object.keys(posts).length;
+              self.users.find(function(currentValue, index, arr) {
+              if(currentValue.uid === snapshot.key){
+                currentValue.numFeedBack=numFeedBack;
+                console.log(currentValue.name + " ==> " + currentValue.numFeedBack);
+                self.users.sort(function(a,b) {
+                  return (a.numFeedBack > b.numFeedBack) ? -1 : ((b.numFeedBack > a.numFeedBack) ? 1 : 0);} );
+                self.$$('#rankingComments').render();
+              }
+              });
+          }
+        });
+      }
+
+    },
+    getUsers:function() {
       var self=this;
       firebase.database().ref(this.activeEvent +'/users').once('value',function(snapshot) {
         var users = snapshot.val();
@@ -178,25 +199,14 @@
         self.users=[];
         for (var user in users) {
           var _user={};
-          var numFeedBack=0;
+          
           numUsers++;
+          _user.uid        = users[user].profile.uid;
           _user.name        = users[user].profile.name;
           _user.picture     = users[user].profile.picture;
           _user.numFeedBack = 0;
-          console.info(users[user].profile.uid);
-          firebase.database().ref(self.activeEvent +'/trackingUserComments/'+users[user].profile.uid).once('value',function(snapshot) {
-            console.info(users[user].profile.uid);
-            var posts=snapshot.val();
-            if (posts){
-                numFeedBack=Object.keys(posts).length;
-                console.info(users[user].profile.uid+ ' - ' + numFeedBack);
-                _user.numFeedBack=numFeedBack;
-            }
-          });
           self.push('users',_user);
-          self.users.sort(function(a,b) {
-            return (a.numFeedBack > b.numFeedBack) ? -1 : ((b.numFeedBack > a.numFeedBack) ? 1 : 0);} );
-          self.$$('#rankingComments').render();
+          //console.info(users[user].profile.uid);
         }
         self.numUsers=numUsers;
       });
