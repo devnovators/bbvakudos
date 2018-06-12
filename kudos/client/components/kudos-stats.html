@@ -7,17 +7,12 @@
     <h3>Results of the event</h3>
   </div>
   <paper-tabs selected="{{selected}}">
-    <paper-tab>Assessment</paper-tab>
+    <paper-tab on-click="closeKudoStats">Assessment</paper-tab>
     <paper-tab on-click="getRanking">Gratefulness</paper-tab>
   </paper-tabs>
 
   <iron-pages selected="{{selected}}">
     <div class="resultFeedback">
-      <!--<paper-button id="btnReload" toggles on-click="reloadFeedback" class="reload">-->
-      <!--  <iron-icon icon="icons:autorenew"></iron-icon> Reload  -->
-      <!--</paper-button>-->
-      
-      
       <template is="dom-if" if="{{withStars}}">
         <paper-card class="paper_card_summary">
           <div class="rate-header titleProject title_summary_div" on-click="unCollapse" data-selector="#blockRating">
@@ -206,7 +201,6 @@
         self.users=[];
         for (var user in users) {
           var _user={};
-          
           numUsers++;
           _user.uid        = users[user].profile.uid;
           _user.name        = users[user].profile.name;
