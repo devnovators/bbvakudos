@@ -4,7 +4,7 @@
     <style include="about-estilo"></style>
     <style include="cards"></style>
     <paper-card class="paper_card_summary">
-      <div class="rate-header titleProject" style="height:70px;background:#2dcccd;" on-click="unCollapseTable" data-selector="#blockKudoStat_{{idKudo}}">
+      <div class="rate-header titleProject" style="height:70px;background:{{kudo.bgcolor}};" on-click="unCollapseTable" data-selector="#blockKudoStat_{{idKudo}}">
           <div class="display_inline kudo_base" style$='background-image: url({{kudo.icon}});'  data-selector="#blockKudoStat_{{idKudo}}"></div>
           <div class="display_inline" width="70%" style="top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;" data-selector="#blockKudoStat_{{idKudo}}">
             {{kudo.title}}
@@ -104,7 +104,6 @@
           this.getCards();  
         }
       }
-      
     }
   });
 </script>
