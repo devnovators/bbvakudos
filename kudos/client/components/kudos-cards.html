@@ -62,9 +62,9 @@
                   <template is="dom-if" if="{{withKudos}}">
                     <template id="tmtKudo" is="dom-repeat" items="{{kudos}}" as="kudo">
                       {{getKudosUser(card.block,card.id,kudo.id)}}
-                      <div class$="[[ActiveClassVotes]]" style="display:inline-block;">
+                      <div class$="[[ActiveClassVotes]]" style="display:inline-block;width:30%;">
                         <div id="id_img_{{card.id}}_{{kudo.id}}" on-click="_assess" data='{{card}}' dataKudo='{{kudo.id}}' style$='background-image: url({{kudo.icon}});' class='kudo_base'>&nbsp;</div>  
-                        <div class="kudo_title">{{kudo.title}}</div>
+                        <div class="kudo_title" style="width:100%">{{kudo.title}}</div>
                       </div>
                     </template>
                   </template>
