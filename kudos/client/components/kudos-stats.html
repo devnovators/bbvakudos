@@ -13,6 +13,8 @@
 
   <iron-pages selected="{{selected}}">
     <div class="resultFeedback">
+      <div id="id_admin_vote" on-click="_updateActiveVote" class='power_base'>&nbsp;</div>
+      
       <template is="dom-if" if="{{withStars}}">
         <paper-card class="paper_card_summary">
           <div class="rate-header titleProject title_summary_div" on-click="unCollapse" data-selector="#blockRating">
@@ -109,6 +111,9 @@
       withKudos     : { type:Boolean, value:false, notify:true},
       withFeedback  : { type:Boolean, value:false, notify:true},
       withStars     : { type:Boolean, value:false, notify:true},
+      
+      activeVotes     : {type:Boolean, value:false, notify:true},
+      isAdmin         : {type:Boolean, value:false, notify:true},
     },
     getKudos:function(){
       var self = this;
@@ -213,6 +218,43 @@
       if(e.target.dataset.selector!='undefined'){
         this.$$(e.target.dataset.selector).toggle();  
       }
+    },
+    verifyAdmin:function(){
+      var idBtnVote=this.$$('#id_admin_vote');
+      idBtnVote.style.display = "none";
+      if(this.isAdmin){
+        idBtnVote.style.display = "inline-block";
+        this.verifyActiveVote();
+      }
+      
+    },
+    verifyActiveVote:function(){
+      var idBtnVote=this.$$('#id_admin_vote');
+      var BtnVoteEnable=idBtnVote.classList.contains('kudo_enable');
+      if(BtnVoteEnable){
+        idBtnVote.classList.remove("kudo_enable");  
+      }
+      if(this.activeVotes){
+        idBtnVote.classList.add("kudo_enable");  
+      }else{
+        idBtnVote.classList.remove("kudo_enable");  
+      }
+      
+    },
+    _updateActiveVote:function(){
+      var refControl = firebase.database().ref(this.activeEvent +'/attributes');
+      var btnActiveVotes=this.$$('#id_admin_vote');
+      var classActiveVotes=btnActiveVotes.classList.contains('kudo_enable');
+      var update = {};
+      var _activeVotes=false;
+      if(!classActiveVotes) {
+        btnActiveVotes.classList.add("kudo_enable");
+        _activeVotes=true;
+      }else{
+        btnActiveVotes.classList.remove("kudo_enable");
+      }
+      update["activeVotes"]=_activeVotes;
+      refControl.update(update);
     }
   });
 </script>

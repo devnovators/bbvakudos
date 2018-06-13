@@ -75,15 +75,6 @@
         </iron-collapse>
       </paper-card>
     </template>
-    <paper-dialog id="feedback" >
-      <h2 id="titleFeedback">Quick feedback for:</h2>
-      <paper-textarea id="txtFeedback" label="Escribe tu feedback..."></paper-textarea>
-      <div class="buttons">
-        <paper-button id="btnFeedback" on-click="sendFeedback" autofocus>Enviar</paper-button>
-        <paper-button dialog-dismiss>Cancelar</paper-button>
-      </div>
-    </paper-dialog>
-    <paper-toast id="toastAlert" text="Gracias por tu feedback"></paper-toast>
   </template>
   <script>
       Polymer({
@@ -279,7 +270,7 @@
             firebase.database().ref(this.activeEvent +'/users').child(this.userEmail).child("/feedback/"+idBlock).child(idCard).child('rating').remove();
             firebase.database().ref(this.activeEvent + '/blocks/' + idBlock + '/cards/'+ idCard +'/rating/'+ this.userEmail).remove();
           }
-        }
+        },
       });
     </script>
 </dom-module>
