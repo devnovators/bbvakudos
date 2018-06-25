@@ -39,6 +39,7 @@
         },
         loadComments: function() {
           var thisChat=this;
+          //console.info("<h1>"+this.currentCard.title + "</h1>");
           var ref = firebase.database().ref(this.activeEvent + "/trackingComments/" + this.currentCard.id);
           thisChat.cards=[];
           ref.once("value").then(function(snapshot) {
@@ -46,8 +47,10 @@
             snapshot.forEach(function(child) {
               var detail=child.val();
               var message={ authorPhoto: detail.authorPic,authorName: detail.author, message: detail.message};
+              //console.info( "<b>" + detail.author +": " + detail.message + "</b>");
               thisChat.push('messages',message);
             });
+            //console.info("-------------------------------------------------------");
             thisChat.$.wait.style.display = "none";
             thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
           });  
