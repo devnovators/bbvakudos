@@ -144,7 +144,9 @@
                 firebase.auth().onAuthStateChanged(function(account) {
                     if (account) {
                         //console.log("user id: " + firebase.auth().currentUser.uid);
-                        
+                        if (account.email.indexOf('@bbva.com')<0){
+                            parent.signOut();
+                        }
                         parent.set('user', account);
                         parent.set('userEmail', account.email);
                         if(account.displayName){
