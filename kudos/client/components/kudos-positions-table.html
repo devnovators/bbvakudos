@@ -23,6 +23,8 @@
     properties: {
       activeEvent       : { type: String,   notify:true},
       withExclusiveKudo : { type: Boolean,  value:false,  notify:true},
+      membersJury       : { type: String,   notify:true },
+      withJury          : { type: Boolean,  value:false,  notify:true},
       cardsKudo         : { type: Array,    value:[],     notify:true},
       sortedArray       : { type: Array,    notify:true},
       kudo              : { type: Object,   notify:true},
@@ -38,25 +40,88 @@
       for(var card of this.cardsKudo){
         var _basicCard=card;
         _basicCard.qtyKudo=0;
+        _basicCard.perKudo=0;
+        _basicCard.qtyJury=0;
+        _basicCard.perJury=0;
+        _basicCard.total=0;
         self.push('sortedArray',_basicCard);
       }
       if(this.withExclusiveKudo){
-        refSelect = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + this.idKudo);
-        refSelect.once('value').then(function(snapshot) {
-          snapshot.forEach(function(child) {
-            self.sortedArray.find(function(currentValue, index, arr) {
-              if(currentValue.idCard === child.val()){
-                currentValue.qtyKudo++;
-              }
-            });
-          });
-          self.sortedArray.sort(self.compareValues('qtyKudo','desc'));
-          self.createTable();
-        });
+        if(this.withJury){
+          this.getRankingExclusiveKudosJury();
+        }else{
+          this.getRankingExclusiveKudos();
+        }
       }else{
-        refSelect = firebase.database().ref(this.activeEvent + "/logKudos/" + idCard + "/" + idKudo +"/" + this.userEmail);
-
+        this.getRankingMultipleKudos();
       }
+    },
+    getRankingExclusiveKudos:function(){
+      var refSelect;
+      var self = this;
+      refSelect = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + this.idKudo);
+      refSelect.once('value').then(function(snapshot) {
+        snapshot.forEach(function(child) {
+          self.sortedArray.find(function(currentValue, index, arr) {
+            if(currentValue.idCard === child.val()){
+              currentValue.total++;
+            }
+          });
+        });
+        self.sortedArray.sort(self.compareValues('total','desc'));
+        self.createTable();
+      });
+    },
+    getRankingExclusiveKudosJury:function(){
+      var refSelect;
+      var self = this;
+      refSelect = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + this.idKudo);
+      refSelect.once('value').then(function(snapshot) {
+        var totalVoters=0;
+        console.log(snapshot.numChildren());
+        totalVoters=snapshot.numChildren();
+        snapshot.forEach(function(child) {
+          self.sortedArray.find(function(currentValue, index, arr) {
+            var _total=0.0;
+            if(currentValue.idCard === child.val()){
+              console.info(child.key);
+              var lista=self.membersJury.toString().replace(/[@.]/g,'_');
+              var tipo = lista.indexOf(child.key);
+              if(tipo<0){
+                currentValue.qtyKudo++;
+              }else{
+                currentValue.qtyJury++;
+              }
+              totalVoters=totalVoters-currentValue.qtyJury;
+              if(totalVoters==0){
+                currentValue.perKudo=0;
+              }else{
+                currentValue.perKudo=((50/totalVoters)*currentValue.qtyKudo);  
+              }
+              if(currentValue.qtyJury==0){
+              
+                currentValue.qtyJury=0;
+              }else{
+                currentValue.perJury=((50/3)*currentValue.qtyJury);  
+              }
+              
+              
+              _total=(currentValue.perJury+currentValue.perKudo);
+              
+              currentValue.perKudo=currentValue.perKudo.toFixed(2);
+              currentValue.perJury=currentValue.perJury.toFixed(2);
+              currentValue.total=_total.toFixed(2);
+            }
+          });
+        });
+        self.sortedArray.sort(self.compareValues('total','desc'));
+        self.createTableJury();
+      });
+    },
+    getRankingMultipleKudos:function(){
+      var refSelect;
+      var self = this;
+      refSelect = firebase.database().ref(this.activeEvent + "/logKudos/" + idCard + "/" + idKudo +"/" + this.userEmail);
     },
     compareValues:function(key, order='asc') {
       return function(a, b) {
@@ -99,12 +164,40 @@
     },
     createTable:function(){
       var item="";
-      var head_start='<div class="row_table_bottom"><div class="row_table_cup"><img src="../images/values_cup.jpg" /></div><div class="row_table_qty">';
-      var head_mid='</div><div class="row_table_detail">';
-      var head_end='</div></div></div>';
+      var head_start='';
+      var head_mid='';
+      var head_end='';
+      
+      head_start = '<div class="row_table_bottom"><div class="row_table_cup"><img src="../images/values_cup.jpg" /></div><div class="row_table_qty">';
+      head_mid   = '</div><div class="row_table_detail_jury">';
+      head_end   = '</div></div></div>';
       this.$$('#table_' +this.idKudo).innerHTML="";
+      
       for(var card of this.sortedArray){
-        item=head_start + card.qtyKudo + head_mid + card.titleBlock +" &gt " + card.title + head_end;
+        item=head_start + card.total + head_mid + card.titleBlock +" &gt " + card.title + head_end;
+        this.$$('#table_' +this.idKudo).innerHTML=this.$$('#table_' +this.idKudo).innerHTML+item;
+      }
+    },
+    createTableJury:function(){
+      var item="";
+      var head_start='';
+      var head_mid='';
+      var head_end='';
+      var head_col_ini='';
+      var head_col_fin='';
+      
+      head_start = '<div class="row_table_bottom"><div class="row_table_cup"><img src="../images/values_cup.jpg" /></div><div class="row_table_qty">';
+      head_col_ini='<div class="row_table_qty">';
+      head_col_fin='</div>';
+      head_mid   = '</div><div class="row_table_detail">';
+      head_end   = '</div></div></div>';
+      this.$$('#table_' +this.idKudo).innerHTML="";
+      
+      for(var card of this.sortedArray){
+        console.info('Item: '+ card.title);
+        console.info('| perJury==> ' + card.perJury +'| qtyJury==> ' + card.qtyJury);
+        console.info('| perKudo==> ' + card.perKudo +'| qtyKudo==> ' + card.qtyKudo);
+        item=head_start + card.total + '%' + head_mid + card.titleBlock +" &gt " + card.title + head_end;
         this.$$('#table_' +this.idKudo).innerHTML=this.$$('#table_' +this.idKudo).innerHTML+item;
       }
     },

@@ -72,7 +72,7 @@
         }
         </style>
         <div hidden$="{{logged}}" width="100%" style="text-align:center; margin-top:25%;">
-            <div id="msgFail"></div>
+            <div id="msgFail" style="color:red"></div>
             Bienvenid@ a Kudos, para poder dejar tu feedback debes identificarte:<br>
             <paper-button class="green" raised on-click="signInWithGoogle">
                 <iron-icon icon="perm-identity"></iron-icon>
@@ -224,7 +224,8 @@
                         parent.$.stats.withExclusiveKudo=snapshot.val().attributes.withExclusiveKudo;
                     }
                     if (snapshot.val().attributes.withJury!=null){
-                        parent.$.stats.withJury=snapshot.val().attributes.withExclusiveKudo;
+                        parent.$.stats.withJury=snapshot.val().attributes.withJury;
+                        parent.$.stats.membersJury=snapshot.val().attributes.membersJury;
                     }
                     parent.$.cards.numStars=snapshot.val().attributes.numStars;
                     parent.$.cards.uid=parent.user.uid;

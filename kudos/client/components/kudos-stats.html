@@ -66,7 +66,7 @@
       
       <template is="dom-if" if="{{withKudos}}">
         <template is="dom-repeat" items="{{kudos}}" as="kudo">
-          <kudos-positions-table id="stat_{{kudo.id}}" active-event='{{activeEvent}}' kudo='{{kudo}}' id-kudo='{{kudo.id}}' with-exclusive-kudo='{{withExclusiveKudo}}' cards-kudo='{{cards}}' ></kudos-positions-table>
+          <kudos-positions-table id="stat_{{kudo.id}}" active-event='{{activeEvent}}' kudo='{{kudo}}' id-kudo='{{kudo.id}}' with-exclusive-kudo='{{withExclusiveKudo}}' with-jury='{{withJury}}' members-jury='{{membersJury}}' cards-kudo='{{cards}}' ></kudos-positions-table>
         </template>
       </template>
       
@@ -106,14 +106,16 @@
       display       : { value: "block" },
       sortedRating  : { type: Array, notify:true },
       
+      membersJury   : { type: String, notify:true },
+      withJury      : { type: Boolean, value:false, notify:true},
       
-      withExclusiveKudo:{type:Boolean, value:false, notify:true},
-      withKudos     : { type:Boolean, value:false, notify:true},
-      withFeedback  : { type:Boolean, value:false, notify:true},
-      withStars     : { type:Boolean, value:false, notify:true},
+      withExclusiveKudo:{type: Boolean, value:false, notify:true},
+      withKudos     : { type: Boolean, value:false, notify:true},
+      withFeedback  : { type: Boolean, value:false, notify:true},
+      withStars     : { type: Boolean, value:false, notify:true},
       
-      activeVotes     : {type:Boolean, value:false, notify:true},
-      isAdmin         : {type:Boolean, value:false, notify:true},
+      activeVotes     : {type: Boolean, value:false, notify:true},
+      isAdmin         : {type: Boolean, value:false, notify:true},
     },
     getKudos:function(){
       var self = this;
