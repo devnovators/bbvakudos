@@ -78,13 +78,13 @@
       refSelect = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + this.idKudo);
       refSelect.once('value').then(function(snapshot) {
         var totalVoters=0;
-        console.log(snapshot.numChildren());
+        //console.log(snapshot.numChildren());
         totalVoters=snapshot.numChildren();
         snapshot.forEach(function(child) {
           self.sortedArray.find(function(currentValue, index, arr) {
             var _total=0.0;
             if(currentValue.idCard === child.val()){
-              console.info(child.key);
+              //console.info(child.key);
               var lista=self.membersJury.toString().replace(/[@.]/g,'_');
               var tipo = lista.indexOf(child.key);
               if(tipo<0){
@@ -194,9 +194,9 @@
       this.$$('#table_' +this.idKudo).innerHTML="";
       
       for(var card of this.sortedArray){
-        console.info('Item: '+ card.title);
-        console.info('| perJury==> ' + card.perJury +'| qtyJury==> ' + card.qtyJury);
-        console.info('| perKudo==> ' + card.perKudo +'| qtyKudo==> ' + card.qtyKudo);
+        //console.info('Item: '+ card.title);
+        //console.info('| perJury==> ' + card.perJury +'| qtyJury==> ' + card.qtyJury);
+        //console.info('| perKudo==> ' + card.perKudo +'| qtyKudo==> ' + card.qtyKudo);
         item=head_start + card.total + '%' + head_mid + card.titleBlock +" &gt " + card.title + head_end;
         this.$$('#table_' +this.idKudo).innerHTML=this.$$('#table_' +this.idKudo).innerHTML+item;
       }
