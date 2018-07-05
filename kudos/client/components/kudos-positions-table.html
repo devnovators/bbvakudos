@@ -108,9 +108,10 @@
               
               _total=(currentValue.perJury+currentValue.perKudo);
               
-              currentValue.perKudo=currentValue.perKudo.toFixed(2);
-              currentValue.perJury=currentValue.perJury.toFixed(2);
-              currentValue.total=_total.toFixed(2);
+              //currentValue.perKudo=currentValue.perKudo.toFixed(2);
+              //currentValue.perJury=currentValue.perJury.toFixed(2);
+              var _total_float=parseFloat(_total.toFixed(2));
+              currentValue.total=_total_float;
             }
           });
         });
