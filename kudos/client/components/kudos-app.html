@@ -112,15 +112,17 @@
                 <template is="dom-if" if="{{!selectEvent}}">
                     <div id="listInitial" style="margin-top:20px;width:90%;">
                         <template id="events" is="dom-repeat" items="{{listEvents}}" as="item">
-                            <div class="rate-header titleProject" style="background-color:#6bb8da;margin-top:8px;margin-left:5px">
-                              <div class="display_inline kudo_base" style$='background-image: url(../images/flags/{{item.flag}});margin-top: 5px;'></div>
-                              <div class="display_inline" style="width:60%;top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;">
-                                {{item.name}}
-                              </div>
-                              <div class="display_inline" style="top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;" on-click="loadEvent" data-selector="{{item.event}}">
-                                Ver
-                              </div>
-                            </div>
+                            <template is="dom-if" if="{{item.visible}}">
+                                <div class="rate-header titleProject" style="background-color:#6bb8da;margin-top:8px;margin-left:5px">
+                                  <div class="display_inline kudo_base" style$='background-image: url(../images/flags/{{item.flag}});margin-top: 5px;'></div>
+                                  <div class="display_inline" style="width:60%;top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;">
+                                    {{item.name}}
+                                  </div>
+                                  <div class="display_inline" style="top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;" on-click="loadEvent" data-selector="{{item.event}}">
+                                    Ver
+                                  </div>
+                                </div>
+                            </template>
                         </template>
                     </div>
                 </template>
@@ -351,9 +353,6 @@
                     this.$.comments.style.display = "none";
                     this.$.stats.getUsers();
                     this.$.stats.verifyAdmin();
-                    if(this.$.stats.withStars){
-                        this.$.stats.getStarRanking();
-                    }
                 }
             },
             showAbout:function() {

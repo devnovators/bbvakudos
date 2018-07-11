@@ -31,7 +31,6 @@
         var self = this;
         self.sortedArray=[];
         for(var card of this.cardsStar){
-          console.info('IDCARD: ' + card.idCard);
           var _basicCard=card;
           _basicCard.qtyStar=0;
           _basicCard.perStar=0;
@@ -52,14 +51,15 @@
       refSelect = firebase.database().ref(this.activeEvent + "/logStars");
       refSelect.once('value').then(function(snapshot) {
         snapshot.forEach(function(child) {
-          console.info(child.key);
-          console.info(child.val());
+          console.info('Feature: ' + child.key);
+          var votes=child.val();
           self.sortedArray.find(function(currentValue, index, arr) {
             if(currentValue.idCard === child.key){
-              for(var vote in child.val()){
-                console.info(vote);
+              for(var vote in votes){
+                currentValue.total=currentValue.total+votes[vote];
+                console.info(votes[vote]);
+                console.info('--------------');
               }
-              //currentValue.total=currentValue.total+;
             }
           });
         });
@@ -151,7 +151,7 @@
     unCollapse: function(e) {
       this.$.blockRanking.toggle();
       if(this.$.blockRanking.opened){
-        this.getRanking();  
+        this.getRankingStar();  
       }
     },
     createTable:function(){
@@ -163,7 +163,7 @@
       head_start = '<div class="row_table_bottom"><div class="row_table_cup"><img src="../images/values_cup.jpg" /></div><div class="row_table_qty">';
       head_mid   = '</div><div class="row_table_detail">';
       head_end   = '</div></div></div>';
-      this.$.tableRankinginnerHTML="";
+      this.$.tableRanking.innerHTML="";
       
       for(var card of this.sortedArray){
         item=head_start + card.total + head_mid + card.titleBlock +" &gt " + card.title + head_end;
