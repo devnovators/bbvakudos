@@ -211,7 +211,6 @@
                 firebase.database().ref("listEvents").once("value").then(function(snapshot) {
                     snapshot.forEach(function(child) {
                         var _item=child.val();
-                        console.info('event ==> ' + _item.event);
                         self.push('listEvents', _item);
                     });
                 });
@@ -219,13 +218,14 @@
             loadEvent:function(e){
                 var event='';
                 if(e.target.dataSelector!='undefined'){
-                    console.info(e.target.dataSelector);
                     event=e.target.dataSelector;
+                    this._loadEvent(event);
                     this.selectEvent=true;
                 }else{
                     event=null;
                 }
-                
+            },
+            _loadEvent:function(event){   
                 var activeEvent = 'events/'+event; //console.log('activo:'+activo);
                 this.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
                 this.$.cards.activeEvent = activeEvent;
