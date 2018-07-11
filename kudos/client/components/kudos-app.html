@@ -108,10 +108,12 @@
                     </app-toolbar>
                 </app-header>
                 <template is="dom-if" if="{{!selectEvent}}">
-                    <div id="listInitial">
+                    <div id="listInitial" style="margin-top:20px;width:80%;">
                         <template id="events" is="dom-repeat" items="{{listEvents}}" as="item">
-                            <div on-click="loadEvent" data-selector="{{item.event}}">
-                                <div class="display_inline" width="30%" on-click="loadEvent" data-selector="{{item.event}}"><img src="../images/flags/{{item.flag}}" ></div>
+                            <div on-click="loadEvent" data-selector="{{item.event}}" style="padding:8px;width:100%">
+                                <div class="display_inline" width="20%" style="padding:3px;" on-click="loadEvent" data-selector="{{item.event}}">
+                                    <img src="../images/flags/{{item.flag}}" width="100%">
+                                </div>
                                 <div class="display_inline" width="70%" on-click="loadEvent" data-selector="{{item.event}}">{{item.name}}</div>
                             </div>
                         </template>
