@@ -75,6 +75,8 @@
           height: 90vh;
         }
         </style>
+        <link rel="import" href="../css/kudo-style.html">
+        <style include="cards"></style>
         <div hidden$="{{logged}}" width="100%" style="text-align:center; margin-top:25%;">
             <div id="msgFail" style="color:red"></div>
             Bienvenid@ a Kudos, para poder dejar tu feedback debes identificarte:<br>
@@ -108,13 +110,16 @@
                     </app-toolbar>
                 </app-header>
                 <template is="dom-if" if="{{!selectEvent}}">
-                    <div id="listInitial" style="margin-top:20px;width:80%;">
+                    <div id="listInitial" style="margin-top:20px;width:90%;">
                         <template id="events" is="dom-repeat" items="{{listEvents}}" as="item">
-                            <div on-click="loadEvent" data-selector="{{item.event}}" style="padding:8px;width:100%">
-                                <div class="display_inline" width="20%" style="padding:3px;" on-click="loadEvent" data-selector="{{item.event}}">
-                                    <img src="../images/flags/{{item.flag}}" width="100%">
-                                </div>
-                                <div class="display_inline" width="70%" on-click="loadEvent" data-selector="{{item.event}}">{{item.name}}</div>
+                            <div class="rate-header titleProject" style="background-color:#6bb8da;margin-top:8px;margin-left:5px">
+                              <div class="display_inline kudo_base" style$='background-image: url(../images/flags/{{item.flag}});margin-top: 5px;'></div>
+                              <div class="display_inline" style="width:60%;top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;">
+                                {{item.name}}
+                              </div>
+                              <div class="display_inline" style="top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;" on-click="loadEvent" data-selector="{{item.event}}">
+                                Ver
+                              </div>
                             </div>
                         </template>
                     </div>
