@@ -257,18 +257,13 @@
           var idCard = data.card.id;
           var idBlock = data.card.block;
           var ratingCard = this.$$('#star_' + idCard).rate;
-          var ref = firebase.database().ref(this.activeEvent + "/users/" + this.userEmail+"/feedback");
-          var refCard=firebase.database().ref(this.activeEvent +'/blocks/'+  idBlock + '/cards/' + idCard +'/rating');
+          var refCard=firebase.database().ref(this.activeEvent +'/logStars/'+ idCard);
           if (ratingCard>0){
-            var updates = {};
             var updatesRating ={};
-            updates["/" + idBlock + "/" + idCard + "/rating"] = ratingCard;
             updatesRating["/" + this.userEmail]=ratingCard;
-            ref.update(updates);
             refCard.update(updatesRating);
           }else{
-            firebase.database().ref(this.activeEvent +'/users').child(this.userEmail).child("/feedback/"+idBlock).child(idCard).child('rating').remove();
-            firebase.database().ref(this.activeEvent + '/blocks/' + idBlock + '/cards/'+ idCard +'/rating/'+ this.userEmail).remove();
+            firebase.database().ref(this.activeEvent + '/logStars/'+ idCard).child(this.userEmail).remove();
           }
         },
       });

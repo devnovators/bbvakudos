@@ -75,6 +75,10 @@
     getRankingExclusiveKudosJury:function(){
       var refSelect;
       var self = this;
+      var _juryMembers=[];
+      var _totalJuryMembers=0;
+      _juryMembers=self.membersJury.toString().split(";");
+      _totalJuryMembers=_juryMembers.length;
       refSelect = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + this.idKudo);
       refSelect.once('value').then(function(snapshot) {
         var totalVoters=0;
@@ -99,16 +103,13 @@
                 currentValue.perKudo=((50/totalVoters)*currentValue.qtyKudo);  
               }
               if(currentValue.qtyJury==0){
-              
                 currentValue.qtyJury=0;
               }else{
-                currentValue.perJury=((50/3)*currentValue.qtyJury);  
+                currentValue.perJury=((50/_totalJuryMembers)*currentValue.qtyJury);  
               }
               
               _total=(currentValue.perJury+currentValue.perKudo);
               
-              //currentValue.perKudo=currentValue.perKudo.toFixed(2);
-              //currentValue.perJury=currentValue.perJury.toFixed(2);
               var _total_float=parseFloat(_total.toFixed(2));
               currentValue.total=_total_float;
             }
@@ -119,6 +120,7 @@
       });
     },
     getRankingMultipleKudos:function(){
+      //pendiente de implementar
       var refSelect;
       var self = this;
       refSelect = firebase.database().ref(this.activeEvent + "/logKudos/" + idCard + "/" + idKudo +"/" + this.userEmail);

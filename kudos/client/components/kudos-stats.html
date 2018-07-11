@@ -16,7 +16,7 @@
       <div id="id_admin_vote" on-click="_updateActiveVote" class='power_base' style="display:none;">&nbsp;</div>
       
       <template is="dom-if" if="{{withStars}}">
-
+        <star-positions-table id="starRanking" active-event='{{activeEvent}}' with-jury='{{withJury}}' members-jury='{{membersJury}}' cards-star='{{cards}}'></star-positions-table>
       </template>
       
       
@@ -129,8 +129,11 @@
     },
     closeKudoStats:function(){
       for(var kudo of this.kudos){
-        this.$$('#stat_'+kudo.id).closeTable();
+        if(this.$$('#stat_'+kudo.id)){
+          this.$$('#stat_'+kudo.id).closeTable();  
+        }
       }
+      
     },
     getRanking:function(){
       var self=this;
@@ -213,6 +216,9 @@
       }
       update["activeVotes"]=_activeVotes;
       refControl.update(update);
+    },
+    getStarRanking:function(){
+      //this.$.starRanking.getRankingStar();
     }
   });
 </script>

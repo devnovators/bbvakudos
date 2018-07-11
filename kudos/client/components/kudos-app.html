@@ -43,6 +43,7 @@
 <link rel="import" href="kudos-positions-table.html">
 <link rel="import" href="kudos-chatbot.html">
 <link rel="import" href="kudos-comments.html">
+<link rel="import" href="star-positions-table.html">
 <dom-module id="kudos-app">
     <template>
         <style is="custom-style">
@@ -51,6 +52,9 @@
         --app-secondary-color: black;
             display: block;
             height: 100vh;
+        }
+        .display_inline{
+          display: inline-block;
         }
         app-header {
             color: #fff;
@@ -89,8 +93,11 @@
                         </div>
                         
                         <div main-title style="font-size: 3.0vmin !important;"><span style="font-size: 3.0vmin;" class="logo">KUDOS</span> | <span style="font-size:13px !important;">[[eventName]]</span></div>
-                        <paper-icon-button icon="view-list"   id="mAgenda" title="Tarjetas"     on-tap="showCards"></paper-icon-button>
-                        <paper-icon-button icon="assessment"  id="mStats"  title="Estadísticas" on-tap="showStats"></paper-icon-button>
+                        
+                        <template is="dom-if" if="{{selectEvent}}">
+                            <paper-icon-button icon="view-list"   id="mAgenda" title="Tarjetas"     on-tap="showCards"></paper-icon-button>
+                            <paper-icon-button icon="assessment"  id="mStats"  title="Estadísticas" on-tap="showStats"></paper-icon-button>
+                        </template>
                         <paper-icon-button icon="help"        id="mHelp"   title="Acerca de"    on-tap="showAbout"></paper-icon-button>
                         <paper-icon-button icon="exit-to-app" id="mExit"   title="Salir"        on-tap="signOut"  ></paper-icon-button>
 
@@ -100,12 +107,24 @@
                         <paper-tooltip for="mExit"   position="bottom" style="max-width:100px;">Salir</paper-tooltip>
                     </app-toolbar>
                 </app-header>
+                <template is="dom-if" if="{{!selectEvent}}">
+                    <div id="listInitial">
+                        <template id="events" is="dom-repeat" items="{{listEvents}}" as="item">
+                            <div on-click="loadEvent" data-selector="{{item.event}}">
+                                <div class="display_inline" width="30%" on-click="loadEvent" data-selector="{{item.event}}"><img src="../images/flags/{{item.flag}}" ></div>
+                                <div class="display_inline" width="70%" on-click="loadEvent" data-selector="{{item.event}}">{{item.name}}</div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                
                 <kudos-cards id="cards" style="display:none"></kudos-cards>
                 <kudos-stats id="stats" style="display:none"></kudos-stats>
                 <kudos-about id="about" style="display:none"></kudos-about>
                 <kudos-chatbot id="chatbot" class="chatbot" style="display:none"></kudos-chatbot>
                 <kudos-comments id="comments" style="display:none"></kudos-comments>
             </app-header-layout>
+            </div>
         </div>
     </template>
     <script src="https://www.gstatic.com/firebasejs/3.0.4/firebase.js"></script>
@@ -123,6 +142,9 @@
                 eventLogo   : { type : String, value  : '../images/bbva.png', notify : true},
                 eventBgColor: { type : String, notify : true},
                 admin       : { type : String, notify : true},
+                
+                listEvents       : { type : Array, notify : true},
+                selectEvent : { type: Boolean, value : false, notify: true},
             },
             _userEmailChanged:function(newVal, oldVal) {
                 //console.log('_userEmailChanged newVal:'+newVal+' oldVal:'+oldVal);
@@ -174,7 +196,6 @@
                             //firebase.database().ref("activeEvent").once("value").then(function(snapshot) {
                                 //var activeEvent = 'events/' + snapshot.val(); //console.log('activo:'+activo);
                                 parent.loadlistEvents();
-                                parent.loadEvent('MX_Q2_DEMO');
                             //});
                         }else{
                             parent.$.msgFail.innerHTML="Tu usuario no es BBVA";
@@ -185,12 +206,26 @@
                 
             },
             loadlistEvents:function(){
+                var self = this;
+                self.listEvents = [];
                 firebase.database().ref("listEvents").once("value").then(function(snapshot) {
-                    //var activeEvent = 'events/' + snapshot.val(); //
-                    //console.log('evento: ' + snapshot.val());
+                    snapshot.forEach(function(child) {
+                        var _item=child.val();
+                        console.info('event ==> ' + _item.event);
+                        self.push('listEvents', _item);
+                    });
                 });
             },
-            loadEvent:function(event){
+            loadEvent:function(e){
+                var event='';
+                if(e.target.dataSelector!='undefined'){
+                    console.info(e.target.dataSelector);
+                    event=e.target.dataSelector;
+                    this.selectEvent=true;
+                }else{
+                    event=null;
+                }
+                
                 var activeEvent = 'events/'+event; //console.log('activo:'+activo);
                 this.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
                 this.$.cards.activeEvent = activeEvent;
@@ -309,6 +344,9 @@
                     this.$.comments.style.display = "none";
                     this.$.stats.getUsers();
                     this.$.stats.verifyAdmin();
+                    if(this.$.stats.withStars){
+                        this.$.stats.getStarRanking();
+                    }
                 }
             },
             showAbout:function() {
