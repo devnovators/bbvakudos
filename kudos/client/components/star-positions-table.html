@@ -9,6 +9,15 @@
               <div class="display_inline title_summary" data-selector="#blockRanking">Reconocimiento por estrellas</div>
           </div>
           <iron-collapse id="blockRanking" style="width:100%;">
+            <template is="dom-if" if="{{withJury}}">
+            <div style="width:100%;background: #ecd878;font-weight: bold;" class="row_table_bottom">
+              <div class="display_inline" style="width:8%;">&nbsp;</div>
+              <div class="display_inline" style="width:10%;">Jur. </div>
+              <div class="display_inline" style="width:10%;">Púb. </div>
+              <div class="display_inline" style="width:10%;">Tot. </div>
+              <div class="display_inline" style="width:55%;">Feature </div>
+            </div>
+            </template>
             <div id="tableRanking"></div>
           </iron-collapse>
         </paper-card>
@@ -51,14 +60,11 @@
       refSelect = firebase.database().ref(this.activeEvent + "/logStars");
       refSelect.once('value').then(function(snapshot) {
         snapshot.forEach(function(child) {
-          console.info('Feature: ' + child.key);
           var votes=child.val();
           self.sortedArray.find(function(currentValue, index, arr) {
             if(currentValue.idCard === child.key){
               for(var vote in votes){
                 currentValue.total=currentValue.total+votes[vote];
-                console.info(votes[vote]);
-                console.info('--------------');
               }
             }
           });
@@ -75,43 +81,55 @@
       var _totalJuryMembers=0;
       _juryMembers=self.membersJury.toString().split(";");
       _totalJuryMembers=_juryMembers.length;
-      
+
       refSelect = firebase.database().ref(this.activeEvent + "/logStars");
       refSelect.once('value').then(function(snapshot) {
-        var totalVoters=0;
-        //console.log(snapshot.numChildren());
-        totalVoters=snapshot.numChildren();
+
         snapshot.forEach(function(child) {
+ 
           self.sortedArray.find(function(currentValue, index, arr) {
             var _total=0.0;
-            if(currentValue.idCard === child.val()){
-              //console.info(child.key);
+            var votes=child.val();
+            var numJuryStar=0;
+            var numPublicStar=0;
+            if(currentValue.idCard === child.key){
+            
               var lista=self.membersJury.toString().replace(/[@.]/g,'_');
-              var tipo = lista.indexOf(child.key);
-              if(tipo<0){
-                currentValue.qtyStar++;
-              }else{
-                currentValue.qtyJury++;
-              }
-              totalVoters=totalVoters-currentValue.qtyJury;
-              if(totalVoters==0){
-                currentValue.perStar=0;
-              }else{
-                currentValue.perStar=((50/totalVoters)*currentValue.qtyStar);  
-              }
-              if(currentValue.qtyJury==0){
               
-                currentValue.qtyJury=0;
+              for(var vote in votes){
+                var tipo = lista.indexOf(vote);
+
+                if(tipo<0){
+                  currentValue.qtyStar=currentValue.qtyStar+votes[vote];
+                  numPublicStar++;
+                }else{
+                  currentValue.qtyJury=currentValue.qtyJury+votes[vote];
+                  numJuryStar++;
+                }
+              }  
+              //console.info(' - currentValue.qtyJury ==> ' +  currentValue.qtyJury + ' / numJuryStar:  ' + numJuryStar );
+              //console.info(' - currentValue.qtyStar ==> ' +  currentValue.qtyStar + ' / numPublicStar:  ' + numPublicStar );
+              
+              var _qtyStar_float=0.0;
+              var _qtyJury_float=0.0;
+              
+              if(numPublicStar==0){
+                _qtyStar_float=0;
               }else{
-                currentValue.perJury=((50/_totalJuryMembers)*currentValue.qtyJury);  
+                _qtyStar_float=(0.5*currentValue.qtyStar)/numPublicStar;  
+              }
+              if(numJuryStar==0){
+                _qtyJury_float=0;
+              }else{
+                _qtyJury_float=(0.5*currentValue.qtyJury)/numJuryStar;  
               }
               
-              _total=(currentValue.perJury+currentValue.perStar);
+              _total=(_qtyJury_float+_qtyStar_float);
               
-              //currentValue.perStar=currentValue.perStar.toFixed(2);
-              //currentValue.perJury=currentValue.perJury.toFixed(2);
-              var _total_float=parseFloat(_total.toFixed(2));
-              currentValue.total=_total_float;
+              currentValue.perStar=parseFloat(_qtyStar_float.toFixed(2));
+              currentValue.perJury=parseFloat(_qtyJury_float.toFixed(2));
+              currentValue.total=parseFloat(_total.toFixed(2));
+              
             }
           });
         });
@@ -173,23 +191,22 @@
     createTableJury:function(){
       var item="";
       var head_start='';
-      var head_mid='';
+      var head_part1='';
+      var head_part2='';
       var head_end='';
-      var head_col_ini='';
-      var head_col_fin='';
       
-      head_start = '<div class="row_table_bottom"><div class="row_table_cup"><img src="../images/values_cup.jpg" /></div><div class="row_table_qty">';
-      head_col_ini='<div class="row_table_qty">';
-      head_col_fin='</div>';
-      head_mid   = '</div><div class="row_table_detail">';
+      head_start = '<div class="row_table_bottom"><div class="display_inline" style="width:13%;text-align:right;border: 2px solid #2dcccd;padding: 4px;border-style: dashed;">';
+      head_part1 = '</div><div class="display_inline" style="width:13%;text-align:right;border: 2px solid #2dcccd;padding: 4px;border-style: dashed;">';
+      head_part2 = '</div><div class="display_inline" style="vertical-align:middle;width:45%;text-align: left;padding-left:3px;"> ';
       head_end   = '</div></div></div>';
+      
       this.$.tableRanking.innerHTML="";
       
       for(var card of this.sortedArray){
         //console.info('Item: '+ card.title);
         //console.info('| perJury==> ' + card.perJury +'| qtyJury==> ' + card.qtyJury);
         //console.info('| perStar==> ' + card.perStar +'| qtyStar==> ' + card.qtyStar);
-        item=head_start + card.total + '%' + head_mid + card.titleBlock +" &gt " + card.title + head_end;
+        item=head_start + card.perJury + head_part1 + card.perStar + head_part1 + card.total + head_part2 + card.titleBlock +" &gt " + card.title + head_end;
         this.$.tableRanking.innerHTML=this.$.tableRanking.innerHTML+item;
       }
     },
