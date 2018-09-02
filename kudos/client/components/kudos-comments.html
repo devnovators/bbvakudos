@@ -37,9 +37,26 @@
             messages        : {type:Array,  notify:true},
             currentCard     : {type:Object, notify:true},
         },
+        reportComments:function(){
+          
+          var ref = firebase.database().ref(this.activeEvent + "/trackingComments/");
+          ref.once("value").then(function(snapshot) {
+            snapshot.forEach(function(child) {
+              console.info("<h2>"+child.key + "</h2>");
+              var cards=child.val();
+              for (var _card in cards) {
+                var detail=cards[_card];
+                console.info( "<b>" + detail.author +": </b>" + detail.message + "<br>");
+              }
+              console.info("-------------------------------------------------------");
+            });
+            
+          });
+        },
         loadComments: function() {
           var thisChat=this;
-          //console.info("<h2>"+this.currentCard.title + "</h2>");
+          //this.reportComments();
+          
           var ref = firebase.database().ref(this.activeEvent + "/trackingComments/" + this.currentCard.id);
           thisChat.cards=[];
           ref.once("value").then(function(snapshot) {
@@ -47,10 +64,8 @@
             snapshot.forEach(function(child) {
               var detail=child.val();
               var message={ authorPhoto: detail.authorPic,authorName: detail.author, message: detail.message};
-              //console.info( "<b>" + detail.author +": </b>" + detail.message + "<br>");
               thisChat.push('messages',message);
             });
-            //console.info("-------------------------------------------------------");
             thisChat.$.wait.style.display = "none";
             thisChat.$.chat.scrollTop=thisChat.$.chat.scrollHeight;
           });  
