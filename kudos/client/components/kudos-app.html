@@ -44,6 +44,7 @@
 <link rel="import" href="kudos-chatbot.html">
 <link rel="import" href="kudos-comments.html">
 <link rel="import" href="star-positions-table.html">
+<link rel="import" href="kudos-award-table.html">
 <dom-module id="kudos-app">
     <template>
         <style is="custom-style">
@@ -270,12 +271,19 @@
                     if (snapshot.val().attributes.withJury!=null){
                         parent.$.stats.withJury=snapshot.val().attributes.withJury;
                         parent.$.stats.membersJury=snapshot.val().attributes.membersJury;
+                        parent.$.cards.membersJury=snapshot.val().attributes.membersJury;
+                    }
+                    if (snapshot.val().attributes.withKudosAward!=null){
+                        parent.$.stats.withKudosAward=snapshot.val().attributes.withKudosAward;
+                        parent.$.cards.withKudosAward=snapshot.val().attributes.withKudosAward;
                     }
                     parent.$.cards.numStars=snapshot.val().attributes.numStars;
                     parent.$.cards.uid=parent.user.uid;
                     parent.$.cards.getKudos();
+                    parent.$.cards.getKudosAward();
                     parent.$.cards.getBlocks();
                     parent.$.stats.getKudos();
+                    parent.$.stats.getKudosAward();
                     parent.$.stats.getBlocks();
 
                     parent.set("eventLogo",snapshot.val().attributes.eventLogo);

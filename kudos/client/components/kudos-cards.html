@@ -71,6 +71,19 @@
                       </div>
                     </template>
                   </template>
+                  
+                  <template is="dom-if" if="{{_getEventType4Kudos()}}">
+                    <template id="tmtKudoAward" is="dom-repeat" items="{{kudosAward}}" as="kudoAward">
+                      <div class="card-actions kudos-button">
+                        {{getKudosAwardUser(card.block,card.id,kudoAward.id)}}
+                        <b>{{kudoAward.description}}</b> <br>
+                        <div style="display:inline-block !important;width:40%;" style$='background-image: url({{kudoAward.icon}});' class='kudo_base'>&nbsp;</div>  
+                        <div class$="[[ActiveClassVotes]]" style="display:inline-block !important;width:50%;">
+                          <star-rating stars="{{kudoAward.levels}}" id="kudoAward_{{card.id}}_{{kudoAward.id}}" on-click="_assessAward" data='{{card.id}}' dataKudo='{{kudoAward.id}}'></star-rating>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
                 </div>
               </div>
             </paper-card>
@@ -94,6 +107,7 @@
           tmpCards        : {type:Array, notify:true},
           blocks          : {type:Array, notify:true},
           kudos           : {type:Array, notify:true},
+          kudosAward      : {type:Array, notify:true},
           withKudos       : {type:Boolean, value:false, notify:true},
           withFeedback    : {type:Boolean, value:false, notify:true},
           withStars       : {type:Boolean, value:false, notify:true},
@@ -102,6 +116,8 @@
           ActiveClassVotes: {type:String, value:true, notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
+          withKudosAward  : {type:Boolean, value:false, notify: true},
+          membersJury   : { type: String, notify:true },
         },
         verifyDisplay:function(flag){
           if(flag) return 'inline-block';
@@ -119,7 +135,18 @@
               kudo.id=child.key;
               self.push('kudos', kudo);
             });
+          });
+        },
+        getKudosAward:function(){
+          var self = this;
+          firebase.database().ref(this.activeEvent + '/kudosAward').once('value').then(function(snapshot) {
+            self.kudosAward = [];
+            snapshot.forEach(function(child) {
+              var kudo = child.val();
+              kudo.id=child.key;
+              self.push('kudosAward', kudo);
             });
+          });
         },
         getBlocks:function(){
           var ref = firebase.database().ref(this.activeEvent + "/blocks");
@@ -199,6 +226,20 @@
             });
           }
         },
+        
+        getKudosAwardUser:function(idBlock,idCard,idKudo){
+          self=this;
+          var ref;
+          ref = firebase.database().ref(this.activeEvent + "/logKudosAward/" + idCard  + "/" + idKudo +"/" + this.userEmail);
+          ref.once('value').then(function(snapshot) {
+            var numStars=0;
+            if(snapshot.val()!=null){
+              numStars=snapshot.val();
+            }
+            self.$$('#kudoAward_' +idCard + '_' +idKudo).rate=numStars;
+          });
+        },
+        
         _assess:function(e) {
           var kudoSeleccionado = Polymer.dom(e).localTarget;
           var _card = kudoSeleccionado.data;
@@ -243,6 +284,26 @@
             }
           }
         },
+        
+        _assessAward:function(e) {
+          var kudoSeleccionado = Polymer.dom(e).localTarget;
+          var idCard = kudoSeleccionado.data;
+          var idKudo = kudoSeleccionado.datakudo;
+          var idBtnKudo=this.$$('#kudoAward_' +idCard +'_' +idKudo);
+          var kudoAward=idBtnKudo.rate;
+          
+          var refControl;
+          refControl = firebase.database().ref(this.activeEvent +'/logKudosAward/' +  idCard  + "/" + idKudo);
+          
+          if (kudoAward>0){
+            var updatesRating ={};
+            updatesRating["/" + this.userEmail]=kudoAward;
+            refControl.update(updatesRating);
+          }else{
+            firebase.database().ref(this.activeEvent + '/logKudosAward/'+ idCard).child(this.userEmail).remove();
+          }
+        },
+        
         getRatingCardUser:function(idBlock,idCard){
           self=this;
           var ref = firebase.database().ref(this.activeEvent + "/logStars/" + idCard + "/" + this.userEmail);
@@ -258,7 +319,6 @@
         _putStars:function(e) {
           var data = e.model['__data__'];
           var idCard = data.card.id;
-          var idBlock = data.card.block;
           var ratingCard = this.$$('#star_' + idCard).rate;
           var refCard=firebase.database().ref(this.activeEvent +'/logStars/'+ idCard);
           if (ratingCard>0){
@@ -267,6 +327,15 @@
             refCard.update(updatesRating);
           }else{
             firebase.database().ref(this.activeEvent + '/logStars/'+ idCard).child(this.userEmail).remove();
+          }
+        },
+        _getEventType4Kudos:function(){
+          var lista=this.membersJury.toString().replace(/[@.]/g,'_');
+          var tipo = lista.indexOf(this.userEmail);
+          if(tipo<0){
+            return false;      
+          }else{
+            return true;
           }
         },
       });

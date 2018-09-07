@@ -5,4 +5,4 @@ nvm ls
 nvm use 8.4
 heroku login
 elvis.nizama.garcia@gmail.com
-git subtree push --prefix kudos heroku master
+git subtree push --prefix kudos heroku master   

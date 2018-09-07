@@ -26,6 +26,9 @@
         </template>
       </template>
       
+      <template is="dom-if" if="{{withKudosAward}}">
+        <kudos-award-table active-event='{{activeEvent}}' cards-kudo='{{cards}}' kudos-award={{kudosAward}}></kudos-award-table>
+      </template>
     </div>
 
     <div class="resultFeedback">
@@ -56,6 +59,7 @@
       activeEvent   : { type: String, notify:true },
       cards         : { type: Array, notify:true },
       kudos         : { type: Array, notify:true },
+      kudosAward    : { type: Array, notify:true },
       users         : { type: Array, notify:true },
       numUsers      : { type: String, notify:true },
       selected      : { value: 0 },
@@ -72,6 +76,8 @@
       
       activeVotes     : {type: Boolean, value:false, notify:true},
       isAdmin         : {type: Boolean, value:false, notify:true},
+      
+      withKudosAward  : {type:Boolean, value:false, notify: true},
     },
     getKudos:function(){
       var self = this;
@@ -83,6 +89,17 @@
           self.push('kudos', kudo);
         });
         });
+    },
+    getKudosAward:function(){
+      var self = this;
+      firebase.database().ref(this.activeEvent + '/kudosAward').once('value').then(function(snapshot) {
+        self.kudos = [];
+        snapshot.forEach(function(child) {
+          var kudo = child.val();
+          kudo.id=child.key;
+          self.push('kudosAward', kudo);
+        });
+      });
     },
     getBlocks:function(){
       var ref = firebase.database().ref(this.activeEvent + "/blocks");
@@ -216,6 +233,22 @@
       }
       update["activeVotes"]=_activeVotes;
       refControl.update(update);
+    },
+    _getEventType4Kudos:function(){
+      if(this.withKudos){
+        if(this.eventType4Kudos=='demo'){
+          return true;    
+        }else{
+          var lista=this.membersJury.toString().replace(/[@.]/g,'_');
+          var tipo = lista.indexOf(this.userEmail);
+          if(tipo<0){
+            return false;      
+          }else{
+            return true;
+          }
+        }
+      }
+      return false;
     },
   });
 </script>
