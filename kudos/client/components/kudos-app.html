@@ -271,6 +271,9 @@
                         parent.$.stats.withJury=snapshot.val().attributes.withJury;
                         parent.$.stats.membersJury=snapshot.val().attributes.membersJury;
                     }
+                    if (snapshot.val().attributes.label4Stars!=null){
+                        parent.$.cards.label4Stars=snapshot.val().attributes.label4Stars;
+                    }
                     parent.$.cards.numStars=snapshot.val().attributes.numStars;
                     parent.$.cards.uid=parent.user.uid;
                     parent.$.cards.getKudos();

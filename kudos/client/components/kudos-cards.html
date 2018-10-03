@@ -55,7 +55,7 @@
                 <div class="card-actions kudos-button">
                   <template is="dom-if" if="{{withStars}}">
                     <div class="rate-name">
-                      ¿El progreso del equipo agregó valor con los objetivos de BBVA y los clientes?
+                      {{label4Stars}}
                     </div>
                     <div class="valoracion-star">
                       <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
@@ -99,9 +99,10 @@
           withStars       : {type:Boolean, value:false, notify:true},
           withExclusiveKudo:{type:Boolean, value:false, notify:true},
           activeVotes     : {type:Boolean, value:false, notify:true},
-          ActiveClassVotes: {type:String, value:true, notify:true},
+          ActiveClassVotes: {type:String, value:'', notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
+          label4Stars     : {type:String, value:'¿El progreso del equipo agregó valor con los objetivos de BBVA y los clientes?', notify:true},
         },
         verifyDisplay:function(flag){
           if(flag) return 'inline-block';
