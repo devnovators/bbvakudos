@@ -64,12 +64,12 @@
                   </template>
                   <template is="dom-if" if="{{withKudos}}">
                     <template id="tmtKudo" is="dom-repeat" items="{{kudos}}" as="kudo">
-                      {{getKudosUser(card.block,card.id,kudo.id)}}
-                      <div class$="[[ActiveClassVotes]]" style="display:inline-block;width:30%;">
-                        <div id="id_img_{{card.id}}_{{kudo.id}}" on-click="_assess" data='{{card}}' dataKudo='{{kudo.id}}' style$='background-image: url({{kudo.icon}});' class='kudo_base'>&nbsp;</div>  
-                        <div class="kudo_title" style="width:100%">{{kudo.title}}</div>
+                      {{getKudosUser(card.block,card.id,kudo.id,card.allowKudos)}}
+                      <div class$="[[ActiveClassVotes]]" style="display:inline-block;width:30%;" >
+                        <div id="id_img_{{card.id}}_{{kudo.id}}"  on-click="_assess" data='{{card}}' dataKudo='{{kudo.id}}' style$='background-image: url({{kudo.icon}});' class='kudo_base'>&nbsp;</div>  
+                        <div id="id_title_{{card.id}}_{{kudo.id}}"  class="kudo_title" style="width:100%">{{kudo.title}}</div>
                       </div>
-                    </template>
+                    </template> 
                   </template>
                 </div>
               </div>
@@ -148,7 +148,7 @@
             var newCard = { id:card, title:block.cards[card].title, description:block.cards[card].description,
               leader:block.cards[card].leader, bgcolor:block.cards[card].bgcolor, withChat:block.cards[card].withChat, 
               linkLabel:block.cards[card].linkLabel, linkValue:block.cards[card].linkValue, kpi:block.cards[card].kpi, 
-              sdacode: block.cards[card].sdacode, mvp: block.cards[card].mvp};
+              sdacode: block.cards[card].sdacode, mvp: block.cards[card].mvp, allowKudos: block.cards[card].allowKudos};
             //parameters
             // newCard.objetivo        =block.cards[card].parameters.objetivo;
             // newCard.detalles        =block.cards[card].parameters.detalles;
@@ -175,17 +175,35 @@
           var btnCard = Polymer.dom(e).localTarget;
           this.fire('showComments', btnCard);
         },    
-        getKudosUser:function(idBlock,idCard,idKudo){
+        _checkKudos:function(kudoId,allowKudos){
+          console.info(allowKudos);
+          if (allowKudos){
+            if(allowKudos.indexOf(idKudo)<0){
+              return "display:inline-block;";
+            }else{
+              return "display:none;";
+            }
+          } else{
+            return "display:inline-block;";
+          }
+        },
+        getKudosUser:function(idBlock,idCard,idKudo,allowKudos){
           self=this;
           var ref;
+          
           if(this.withExclusiveKudo){
             ref = firebase.database().ref(this.activeEvent + "/logExclusiveKudos/" + idKudo +"/" + this.userEmail);
             ref.once('value').then(function(snapshot) {
               var kudo=self.$$('#id_img_' +idCard +'_' +idKudo);
+              var title=self.$$('#id_title_' +idCard +'_' +idKudo);
               if(snapshot.val()!=null){
                 if(idCard==snapshot.val()){
                   kudo.classList.add('kudo_enable');
                 }
+              }
+              if(allowKudos.indexOf(idKudo)<0){
+                kudo.classList.add('kudo_none');
+                title.classList.add('kudo_none');
               }
             });
           }else{
