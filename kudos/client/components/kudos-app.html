@@ -113,7 +113,7 @@
                     <div id="listInitial" style="margin-top:20px;width:90%;">
                         <template id="events" is="dom-repeat" items="{{listEvents}}" as="item">
                             <template is="dom-if" if="{{item.visible}}">
-                                <div class="rate-header titleProject" style="background-color:#6bb8da;margin-top:8px;margin-left:5px;border-radius: 5px;">
+                                <div class="rate-header titleProject" style="background-color:#6bb8da;margin-top:8px;margin-left:5px;border-radius: 5px;" on-click="loadEvent" data-selector="{{item.event}}">
                                   <div class="display_inline kudo_base" style$='background-image: url(../images/flags/{{item.flag}});margin-top: 5px;'></div>
                                   <div class="display_inline" style="width:60%;top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;">
                                     {{item.name}}
@@ -236,6 +236,7 @@
             },
             _loadEvent:function(event){   
                 var activeEvent = 'events/'+event; //console.log('activo:'+activo);
+                var parent=this;
                 this.set('activeEvent', activeEvent); //console.log('parent.activeEvent:', parent.activeEvent);
                 this.$.cards.activeEvent = activeEvent;
                 this.$.stats.activeEvent = activeEvent;
@@ -243,7 +244,7 @@
                 this.$.comments.activeEvent = activeEvent;
                 this.$.about.getKudos();
                 this.$.about.getMember();
-                var parent=this;
+                
                 parent.$.cards.isAdmin=false;
                 firebase.database().ref(activeEvent).once("value").then(function(snapshot) {
                     parent.set('eventName', snapshot.val().attributes.title); 
@@ -260,8 +261,8 @@
                         parent.$.stats.withKudos=snapshot.val().attributes.withKudos;
                     }
                     if (snapshot.val().attributes.withFeedback!=null){
-                        parent.$.cards.withFeedback=snapshot.val().attributes.withKudos;
-                        parent.$.stats.withFeedback=snapshot.val().attributes.withKudos;
+                        parent.$.cards.withFeedback=snapshot.val().attributes.withFeedback;
+                        parent.$.stats.withFeedback=snapshot.val().attributes.withFeedback;
                     }
                     if (snapshot.val().attributes.withExclusiveKudo!=null){
                         parent.$.cards.withExclusiveKudo=snapshot.val().attributes.withExclusiveKudo;
@@ -273,6 +274,11 @@
                     }
                     if (snapshot.val().attributes.label4Stars!=null){
                         parent.$.cards.label4Stars=snapshot.val().attributes.label4Stars;
+                    }
+                    if (snapshot.val().attributes.withExclusiveGuests!=null){
+                        if(snapshot.val().attributes.withExclusiveGuests){
+                            parent.validateExclusiveGuests(parent.$.cards.userEmail);        
+                        }
                     }
                     parent.$.cards.numStars=snapshot.val().attributes.numStars;
                     parent.$.cards.uid=parent.user.uid;
@@ -404,7 +410,22 @@
             signOut:function() {
                 firebase.auth().signOut();
                 this.set('logged', false);
-            }
+            },
+            validateExclusiveGuests:function(email) {
+                var self = this;
+                var guest=email.toString().replace("_bbva_com","");
+                var validation=false;
+                console.log(guest);
+                firebase.database().ref(self.activeEvent + '/guests/'+guest).once('value').then(function(snapshot) {
+                    console.log(snapshot.val());
+                    if(snapshot.val()){
+                        self.$.cards.withKudos=true;
+                    }else{
+                        self.$.cards.withKudos=false;
+                    }
+                    //
+                });
+            },
         });
     </script>
 </dom-module>

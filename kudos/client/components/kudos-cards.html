@@ -30,7 +30,7 @@
                     <div class="div_middle">
                       <div><b>Description:</b> {{card.description}}</div>
                       <template is="dom-if" if="{{card.sdacode}}">
-                        <div><b>SDACODE:</b> {{card.sdacode}}</div>
+                        <div><b>SDA Tool:</b> {{card.sdacode}}</div>
                       </template>
                       <template is="dom-if" if="{{card.kpi}}">
                         <div><b>Meta:</b> {{card.kpi}}</div>
@@ -54,12 +54,14 @@
                 </div>
                 <div class="card-actions kudos-button">
                   <template is="dom-if" if="{{withStars}}">
-                    <div class="rate-name">
-                      {{label4Stars}}
-                    </div>
-                    <div class="valoracion-star">
-                      <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
-                      {{getRatingCardUser(card.block,card.id)}}
+                    <div class$="[[ActiveClassVotes]]" style="display:inline-block" >
+                      <div class="rate-name">
+                        {{label4Stars}}
+                      </div>
+                      <div class="valoracion-star">
+                        <star-rating stars="{{numStars}}" id="star_{{card.id}}" on-click="_putStars"></star-rating>
+                        {{getRatingCardUser(card.block,card.id)}}
+                      </div>
                     </div>
                   </template>
                   <template is="dom-if" if="{{withKudos}}">
@@ -99,6 +101,7 @@
           withStars       : {type:Boolean, value:false, notify:true},
           withExclusiveKudo:{type:Boolean, value:false, notify:true},
           activeVotes     : {type:Boolean, value:false, notify:true},
+          visibleButtons  : {type:Boolean, value:false, notify:true},
           ActiveClassVotes: {type:String, value:'', notify:true},
           eventBgImage    : {type:String, notify:true},
           numStars        : {type:Number, notify:true},
