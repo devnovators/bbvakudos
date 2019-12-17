@@ -1,3 +1,4 @@
-./node_modules
-./kudos/node_modules
-./kudos/package-lock.json
+/node_modules
+/kudos/node_modules
+/kudos/package-lock.json
+	
