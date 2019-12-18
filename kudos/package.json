@@ -1,7 +1,7 @@
 {
   "name": "kudos-bbva",
   "version": "0.0.0",
-  "description": "A chat example to showcase how to use `socket.io` with a static `express` server with `async` for control flow.",
+  "description": "Una forma de dar feedback",
   "main": "server.js",
   "repository": "",
   "author": "Elvis Nizama <elvis.nizama.garcia@gmail.com>",

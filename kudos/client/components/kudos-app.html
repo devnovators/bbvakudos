@@ -74,6 +74,17 @@
           background: #ffffff;
           height: 90vh;
         }
+        .btnView {
+            width: 50px;
+            background-color: coral;
+            top: 40%;
+            text-align: center;
+            transform: translateY(-90%);
+            font-weight: bolder;
+            color: #fff!important;
+            border-radius: 10px;
+            cursor: pointer;
+        }
         </style>
         <link rel="import" href="../css/kudo-style.html">
         <style include="cards"></style>
@@ -118,7 +129,7 @@
                                   <div class="display_inline" style="width:60%;top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;">
                                     {{item.name}}
                                   </div>
-                                  <div class="display_inline" style="top: 40%;transform: translateY(-90%);font-weight:bolder;color:#fff!important;" on-click="loadEvent" data-selector="{{item.event}}">
+                                  <div class="display_inline btnView" on-click="loadEvent" data-selector="{{item.event}}">
                                     Ver
                                   </div>
                                 </div>
@@ -415,9 +426,7 @@
                 var self = this;
                 var guest=email.toString().replace("_bbva_com","");
                 var validation=false;
-                console.log(guest);
                 firebase.database().ref(self.activeEvent + '/guests/'+guest).once('value').then(function(snapshot) {
-                    console.log(snapshot.val());
                     if(snapshot.val()){
                         self.$.cards.withKudos=true;
                     }else{

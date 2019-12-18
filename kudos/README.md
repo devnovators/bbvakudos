@@ -5,6 +5,7 @@ nvm ls
 nvm use 8.4
 heroku login
 elvis.nizama.garcia@gmail.com
+heroku git:remote -a bbvaglobal
 git subtree push --prefix kudos heroku master
 
 

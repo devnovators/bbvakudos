@@ -8,7 +8,6 @@ var path = require('path');
 
 var async = require('async');
 var express = require('express');
-
 //
 // ## SimpleServer `SimpleServer(obj)`
 //
