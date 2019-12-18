@@ -188,7 +188,7 @@
                     if (account) {
                         //console.log("user id: " + firebase.auth().currentUser.uid);
                         // || account.email.toUpperCase().indexOf('DEMOBBVA@GMAIL.COM')<0 
-                        if (account.email.toUpperCase().indexOf('@BBVA.COM')>=0  || account.email.toUpperCase().indexOf('DEMOBBVA@GMAIL.COM')>=0 ){
+                        if (account.email.toUpperCase().indexOf('@BBVA.COM')>=0 || account.email.toUpperCase().indexOf('@BBVACF.COM')>=0  || account.email.toUpperCase().indexOf('DEMOBBVA@GMAIL.COM')>=0 ){
                             parent.set('user', account);
                             parent.set('userEmail', account.email);
                             if(account.displayName){
